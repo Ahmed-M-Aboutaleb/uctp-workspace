@@ -1,0 +1,38 @@
+{
+  "configuration": {
+    "dataset": "./inputs/ITC-2007/comp-2007-2-1.tim",
+    "events": 400,
+    "rooms": 10,
+    "students": 500,
+    "timeslots": 45,
+    "time_limit_sec": 600,
+    "tp_percentage": 0.2,
+    "independent_runs": 1
+  },
+  "statistical_results": {
+    "overall_fitness": {
+      "best": 32002498,
+      "worst": 32002498,
+      "mean": 3.20025e+07,
+      "stddev": 0
+    },
+    "hard_constraint_violations": {
+      "best": 32,
+      "worst": 32,
+      "mean": 32,
+      "stddev": 0
+    },
+    "soft_constraint_violations": {
+      "best": 2498,
+      "worst": 2498,
+      "mean": 2498,
+      "stddev": 0
+    },
+    "generations_passed": {
+      "best": 9860,
+      "worst": 9860,
+      "mean": 9860,
+      "stddev": 0
+    }
+  }
+}

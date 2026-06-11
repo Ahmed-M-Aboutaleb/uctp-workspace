@@ -1,0 +1,38 @@
+{
+  "configuration": {
+    "dataset": "inputs/ITC-2002/small_1.dat",
+    "events": 100,
+    "rooms": 5,
+    "students": 80,
+    "timeslots": 45,
+    "time_limit_sec": 90,
+    "tp_percentage": 0.2,
+    "independent_runs": 30
+  },
+  "statistical_results": {
+    "overall_fitness": {
+      "best": 1,
+      "worst": 11,
+      "mean": 3.7,
+      "stddev": 1.9
+    },
+    "hard_constraint_violations": {
+      "best": 0,
+      "worst": 0,
+      "mean": 0,
+      "stddev": 0
+    },
+    "soft_constraint_violations": {
+      "best": 1,
+      "worst": 11,
+      "mean": 3.7,
+      "stddev": 1.9
+    },
+    "generations_passed": {
+      "best": 1577,
+      "worst": 1759,
+      "mean": 1689.97,
+      "stddev": 40.7631
+    }
+  }
+}

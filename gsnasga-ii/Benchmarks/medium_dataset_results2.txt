@@ -1,0 +1,71 @@
+========================================
+  GSNSGA-II: University Course Timetabling
+========================================
+
+Dataset:      data/socha/medium3.txt
+Time/run:     1000 seconds
+s_max:        1500
+Population:   48
+Gamma (GS%):  0.6
+Pm (mutate):  0.6
+Tau:          20
+Base seed:    45
+Seed mode:    variable (seed+0 .. seed+19)
+Runs:         20
+
+Loading dataset...
+Problem loaded:
+  Events (n)    = 400
+  Rooms  (m)    = 10
+  Features (l)  = 5
+  Students (k)  = 200
+  TimeSlots (p) = 45
+  Feasible event-room pairs = 1623
+  Avg conflict degree = 56.57
+
+Running 20 independent runs (20000s total estimated)...
+
+Run  Seed   HCV    f1(S1)  f2(S2)  f3(S3)  Total SCV  Feasible PFsize  Time(s) 
+-------------------------------------------------------------------------------
+1    45     1      65      81      33      179        no       48      1000.0  
+2    46     1      122     42      59      223        no       48      1000.0  
+3    47     0      19      107     27      153        YES      48      1000.1  
+4    48     0      64      121     39      224        YES      20      1000.0  
+5    49     0      5       89      22      116        YES      48      1000.0  
+6    50     0      126     81      26      233        YES      9       1000.0  
+7    51     0      44      114     24      182        YES      48      1000.0  
+8    52     0      73      95      52      220        YES      7       1000.0  
+9    53     0      35      115     35      185        YES      29      1000.0  
+10   54     0      17      101     18      136        YES      48      1000.0  
+11   55     0      51      102     14      167        YES      48      1000.0  
+12   56     0      146     96      30      272        YES      18      1000.0  
+13   57     0      96      83      22      201        YES      48      1000.0  
+14   58     0      30      111     15      156        YES      48      1000.0  
+15   59     0      91      88      26      205        YES      20      1000.0  
+16   60     0      166     130     45      341        YES      6       7874.0  
+17   61     0      71      109     48      228        YES      8       1000.0  
+18   62     0      76      115     37      228        YES      25      1000.0  
+19   63     0      112     115     27      254        YES      48      1000.0  
+20   64     0      41      108     40      189        YES      37      1000.0  
+
+===============================================================================
+  SUMMARY STATISTICS (20 runs)
+===============================================================================
+
+Feasibility:
+  Runs with feasible solutions: 18 / 20
+  Best SCV (feasible runs only): 116
+  Avg  SCV (feasible runs only): 205.00
+  Worst SCV (feasible runs only): 341
+
+All-run statistics (best solution per run):
+-------------------------------------------------------
+Metric              Best      Average     Worst     Std Dev   
+-------------------------------------------------------
+Total SCV           116       204.60      341       50.91     
+f1 (S1)             5         72.50       166       44.74     
+f2 (S2)             42        100.15      130       19.48     
+f3 (S3)             14        31.95       59        12.36     
+-------------------------------------------------------
+
+Best run: Run 5 (seed=49) | SCV=116 | f1=5 | f2=89 | f3=22 | FEASIBLE
