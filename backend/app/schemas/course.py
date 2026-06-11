@@ -22,5 +22,8 @@ class CourseResponse(CourseBase):
     instructors: List[InstructorResponse] = []
     students: List[StudentResponse] = [] # Students will populate later during enrollment
     features: List[FeatureResponse] = []
+    is_enrollment_open: bool = False
+    course_availability: List[int] = [1] * 45
+    precedence_rules: List[int] = []
     
     model_config = ConfigDict(from_attributes=True)

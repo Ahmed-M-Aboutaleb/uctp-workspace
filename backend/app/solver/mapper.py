@@ -72,5 +72,22 @@ class TimetableMapper:
                     else:
                         f.write("0\n")
 
+            # BLOCK 6: Course Availability Matrix (num_events x 45)
+            for course in active_courses:
+                for t in range(45):
+                    if course.course_availability and len(course.course_availability) > t:
+                        f.write(f"{course.course_availability[t]}\n")
+                    else:
+                        f.write("1\n")
+
+            # BLOCK 7: Precedence Rules Matrix (num_events x num_events)
+            for course in active_courses:
+                for other_course in active_courses:
+                    idx = active_courses.index(other_course)
+                    if course.precedence_rules and len(course.precedence_rules) > idx:
+                        f.write(f"{course.precedence_rules[idx]}\n")
+                    else:
+                        f.write("0\n")
+
         logger.info(f"✅ Successfully generated strictly formatted .dat file at {file_path}")
         return file_path, ordered_course_ids, ordered_room_ids

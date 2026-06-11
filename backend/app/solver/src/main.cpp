@@ -135,10 +135,14 @@ struct Individual {
 class UCTPInstance {
 public:
     int num_events = 0, num_rooms = 0, num_students = 0, num_features = 0;
+    bool is_itc2007 = false;
     std::vector<Event> events; std::vector<Room> rooms;
     std::vector<std::bitset<MAX_EVENTS>> event_conflict; 
     std::vector<std::vector<int>> student_events;        
     std::vector<std::bitset<MAX_ROOMS>> event_room_possible; 
+
+    std::vector<std::bitset<NUM_TIMESLOTS>> event_timeslot_available;
+    std::vector<std::pair<int, int>> precedence_rules;
 
     inline bool can_room_host_event(int r_idx, int e_idx) const {
         if (rooms[r_idx].capacity < events[e_idx].num_students) return false;
@@ -214,6 +218,7 @@ private:
             while(e1 != -1) {
                 int r1 = ind.room_id[e1];
                 if (r1 == -1 || !instance.can_room_host_event(r1, e1)) fit.hcv++; 
+                
                 int e2 = ind.next_evt[e1];
                 while(e2 != -1) {
                     int r2 = ind.room_id[e2];
@@ -221,8 +226,22 @@ private:
                     if (instance.share_students(e1, e2)) fit.hcv++; 
                     e2 = ind.next_evt[e2];
                 }
+                
                 if (t % SLOTS_PER_DAY == SLOTS_PER_DAY - 1) fit.scv += instance.events[e1].num_students;
-                e1 = ind.next_evt[e1];
+
+                // ==========================================
+                // ITC-2007 CHECKS MUST BE INSIDE THE e1 LOOP
+                // ==========================================
+                if (instance.is_itc2007) {
+                    // 1. Timeslot Availability Check
+                    if (!instance.event_timeslot_available[e1].test(t)) {
+                        fit.hcv++;
+                    }
+                    
+                }
+                // ==========================================
+
+                e1 = ind.next_evt[e1]; // Advance to the next event
             }
         }
         for (int s = 0; s < instance.num_students; ++s) {
@@ -242,6 +261,7 @@ private:
                 if (classes_today == 1) fit.scv++; 
             }
         }
+        fit.score = fit.hcv > 0 ? ((fit.hcv * HARD_CONSTRAINT_PENALTY) + fit.scv) : fit.scv;
         return fit;
     }
 
@@ -290,7 +310,18 @@ public:
         }
         return scv_after - scv_before;
     }
-
+    int count_precedence_hcv(const Individual& ind) const {
+        if (!instance.is_itc2007) return 0;
+        int hcv = 0;
+        for (const auto& rule : instance.precedence_rules) {
+            int t1 = ind.timeslot_id[rule.first];
+            int t2 = ind.timeslot_id[rule.second];
+            if (t1 != -1 && t2 != -1 && t1 >= t2) { // Violation
+                hcv++;
+            }
+        }
+        return hcv;
+    }
     Fitness evaluate(const Individual& ind) const {
         Fitness fit;
         for (int t = 0; t < NUM_TIMESLOTS; ++t) {
@@ -298,13 +329,26 @@ public:
             while (e1 != -1) {
                 int r1 = ind.room_id[e1];
                 if (r1 == -1 || !instance.can_room_host_event(r1, e1)) fit.hcv++;
+                
                 int e2 = ind.next_evt[e1];
                 while (e2 != -1) {
                     if (r1 != -1 && r1 == ind.room_id[e2]) fit.hcv++;
                     if (instance.share_students(e1, e2)) fit.hcv++;
                     e2 = ind.next_evt[e2];
                 }
-                e1 = ind.next_evt[e1];
+
+                // ==========================================
+                // ITC-2007 CHECKS MUST BE INSIDE THE e1 LOOP
+                // ==========================================
+                if (instance.is_itc2007) {
+                    // 1. Timeslot Availability Check
+                    if (!instance.event_timeslot_available[e1].test(t)) {
+                        fit.hcv++;
+                    }
+                }
+                // ==========================================
+
+                e1 = ind.next_evt[e1]; // Advance to the next event
             }
         }
         for (int d = 0; d < DAYS; ++d) {
@@ -330,6 +374,7 @@ public:
                 if (classes_today == 1) fit.scv++; 
             }
         }
+        fit.hcv += count_precedence_hcv(ind);
         fit.score = fit.hcv > 0 ? ((fit.hcv * HARD_CONSTRAINT_PENALTY) + fit.scv) : fit.scv;
         return fit;
     }
@@ -338,11 +383,12 @@ public:
         std::bitset<NUM_TIMESLOTS> t_mask; std::bitset<DAYS> d_mask; std::bitset<MAX_STUDENTS> s_mask;
         t_mask.set(t1); t_mask.set(t2); d_mask.set(t1/SLOTS_PER_DAY); d_mask.set(t2/SLOTS_PER_DAY);
         for(int s : instance.events[e].students) s_mask.set(s);
-
+        int prec_before = count_precedence_hcv(old_ind);
+        int prec_after = count_precedence_hcv(new_ind);
         Fitness before = get_partial_fitness(old_ind, t_mask, d_mask, s_mask);
         Fitness after  = get_partial_fitness(new_ind, t_mask, d_mask, s_mask);
-
-        fit.hcv += (after.hcv - before.hcv); fit.scv += (after.scv - before.scv);
+        fit.hcv += (after.hcv - before.hcv) + (prec_after - prec_before); 
+        fit.scv += (after.scv - before.scv);
         fit.score = fit.is_feasible() ? fit.scv : ((fit.hcv * HARD_CONSTRAINT_PENALTY) + fit.scv);
     }
 
@@ -351,11 +397,13 @@ public:
         t_mask.set(t1); t_mask.set(t2); d_mask.set(t1/SLOTS_PER_DAY); d_mask.set(t2/SLOTS_PER_DAY);
         for(int s : instance.events[e1].students) s_mask.set(s);
         for(int s : instance.events[e2].students) s_mask.set(s);
-
+        int prec_before = count_precedence_hcv(old_ind);
+        int prec_after = count_precedence_hcv(new_ind);
         Fitness before = get_partial_fitness(old_ind, t_mask, d_mask, s_mask);
         Fitness after  = get_partial_fitness(new_ind, t_mask, d_mask, s_mask);
 
-        fit.hcv += (after.hcv - before.hcv); fit.scv += (after.scv - before.scv);
+        fit.hcv += (after.hcv - before.hcv) + (prec_after - prec_before); 
+        fit.scv += (after.scv - before.scv);
         fit.score = fit.is_feasible() ? fit.scv : ((fit.hcv * HARD_CONSTRAINT_PENALTY) + fit.scv);
     }
 
@@ -366,11 +414,12 @@ public:
         for(int s : instance.events[e1].students) s_mask.set(s);
         for(int s : instance.events[e2].students) s_mask.set(s);
         for(int s : instance.events[e3].students) s_mask.set(s);
-
+        int prec_before = count_precedence_hcv(old_ind);
+        int prec_after = count_precedence_hcv(new_ind);
         Fitness before = get_partial_fitness(old_ind, t_mask, d_mask, s_mask);
         Fitness after  = get_partial_fitness(new_ind, t_mask, d_mask, s_mask);
-
-        fit.hcv += (after.hcv - before.hcv); fit.scv += (after.scv - before.scv);
+        fit.hcv += (after.hcv - before.hcv) + (prec_after - prec_before); 
+        fit.scv += (after.scv - before.scv);
         fit.score = fit.is_feasible() ? fit.scv : ((fit.hcv * HARD_CONSTRAINT_PENALTY) + fit.scv);
     }
 };
@@ -393,15 +442,13 @@ private:
         for (int new_t = 0; new_t < NUM_TIMESLOTS; ++new_t) {
             if (new_t == old_t) continue;
             
-            if (target_scv) {
-                bool h1_conflict = false;
-                int curr = ind.head[new_t];
-                while(curr != -1) {
-                    if (instance.share_students(e_idx, curr)) { h1_conflict = true; break; }
-                    curr = ind.next_evt[curr];
-                }
-                if (h1_conflict) continue;
+            bool h1_conflict = false;
+            int curr = ind.head[new_t];
+            while(curr != -1) {
+                if (instance.share_students(e_idx, curr)) { h1_conflict = true; break; }
+                curr = ind.next_evt[curr];
             }
+            if (h1_conflict) continue;
 
             Individual next = ind; 
             next.timeslot_id[e_idx] = new_t; next.update_slot(e_idx, old_t, new_t);
@@ -430,21 +477,21 @@ private:
             int t2 = ind.timeslot_id[e2_idx];
             if (t1 == t2) continue;
 
-            if (target_scv) {
-                bool h1_conflict = false;
-                int curr = ind.head[t2];
-                while(curr != -1) {
-                    if (curr != e2_idx && instance.share_students(e1_idx, curr)) { h1_conflict = true; break; }
-                    curr = ind.next_evt[curr];
-                }
-                if (h1_conflict) continue;
-                curr = ind.head[t1];
-                while(curr != -1) {
-                    if (curr != e1_idx && instance.share_students(e2_idx, curr)) { h1_conflict = true; break; }
-                    curr = ind.next_evt[curr];
-                }
-                if (h1_conflict) continue;
+
+            bool h1_conflict = false;
+            int curr = ind.head[t2];
+            while(curr != -1) {
+                if (curr != e2_idx && instance.share_students(e1_idx, curr)) { h1_conflict = true; break; }
+                curr = ind.next_evt[curr];
             }
+            if (h1_conflict) continue;
+            curr = ind.head[t1];
+            while(curr != -1) {
+                if (curr != e1_idx && instance.share_students(e2_idx, curr)) { h1_conflict = true; break; }
+                curr = ind.next_evt[curr];
+            }
+            if (h1_conflict) continue;
+
 
             Individual next = ind; std::swap(next.timeslot_id[e1_idx], next.timeslot_id[e2_idx]);
             next.update_slot(e1_idx, t1, t2); next.update_slot(e2_idx, t2, t1);
@@ -678,6 +725,11 @@ public:
             }
 
             ++iterations;
+            if(iterations % 500 == 0){
+                g_logger.log(LogLevel::INFO, "Generation " + std::to_string(iterations) + 
+                             " | Best HCV: " + std::to_string(population[0].fitness.hcv) + 
+                             " | Best SCV: " + std::to_string(population[0].fitness.scv));
+            }
 
             int p1 = tournament_selection();
             int p2 = tournament_selection();
@@ -733,8 +785,48 @@ void loadInstance(const std::string& filename, UCTPInstance& instance) {
             int req_feature; file >> req_feature; if (req_feature == 1) instance.events[e].features.set(f);
         }
     }
+    // ========================================================================
+    // ITC-2007 EXTENSION: Detect EOF and parse additional matrices if present
+    // ========================================================================
+
+    instance.is_itc2007 = false;
+    instance.event_timeslot_available.assign(instance.num_events, std::bitset<NUM_TIMESLOTS>().set()); // All 1s
+
+    int peek_val;
+    if (file >> peek_val) {
+        instance.is_itc2007 = true;
+        g_logger.log(LogLevel::INFO, "Detected additional matrices (ITC-2007 format).");
+
+        // --- Parse Timeslot Availability ---
+        for (int e = 0; e < instance.num_events; ++e) {
+            for (int t = 0; t < NUM_TIMESLOTS; ++t) {
+                int val = (e == 0 && t == 0) ? peek_val : 0;
+                if (!(e == 0 && t == 0)) file >> val;
+                
+                if (val == 0) {
+                    instance.event_timeslot_available[e].reset(t);
+                }
+            }
+        }
+
+        // --- Parse Precedence Matrix ---
+        for (int e1 = 0; e1 < instance.num_events; ++e1) {
+            for (int e2 = 0; e2 < instance.num_events; ++e2) {
+                int val; file >> val;
+                if (val == 1) { // 1 means e1 must be strictly BEFORE e2
+                    instance.precedence_rules.push_back({e1, e2});
+                }
+            }
+        }
+    } else {
+        g_logger.log(LogLevel::INFO, "No additional matrices detected (Standard format).");
+    }
     file.close();
 
+    // ========================================================================
+    // Post-Processing
+    // ========================================================================
+    
     instance.event_conflict.resize(instance.num_events);
     for (int s = 0; s < instance.num_students; ++s) {
         const auto& student_classes = instance.student_events[s];
@@ -813,55 +905,41 @@ std::string getTimestampString() {
 
 int main(int argc, char* argv[]) {
     std::string filename = "";
-    std::string base_folder = "";
-    bool debug_logging = false;
+    std::string base_folder = "timetables/" + getTimestampString();
+    bool debug_logging = false; 
 
-    // 1. Parse command line arguments using flags
     for (int i = 1; i < argc; ++i) {
         std::string arg = argv[i];
-        if (arg == "--input" && i + 1 < argc) {
-            filename = argv[++i]; // Grab the next argument as the input file
-        } else if (arg == "--output" && i + 1 < argc) {
-            base_folder = argv[++i]; // Grab the next argument as the output directory
-        } else if (arg == "--debug") {
-            debug_logging = true;
-        }
+        if (arg == "--debug") debug_logging = true;
+        else if (arg == "--input" && i + 1 < argc) filename = argv[++i];
+        else if (arg == "--output" && i + 1 < argc) base_folder = argv[++i];
+        else if (filename.empty() && arg[0] != '-') filename = arg;
     }
 
-    // 2. Validate required arguments
-    if (filename.empty() || base_folder.empty()) {
-        std::cerr << "Usage: ./uctp_solver --input <file.tim> --output <output_folder> [--debug]\n";
-        return 1;
-    }
-
+    if (filename.empty()) { std::cerr << "Usage: ./uctp_solver --input <instance_file.dat> [--output <dir>]" << std::endl; return 1; }
+    
     g_logger.setDebug(debug_logging);
     
-    UCTPInstance instance; 
-    loadInstance(filename, instance);
+    UCTPInstance instance; loadInstance(filename, instance);
 
     long long time_limit_sec = 90; 
-    long long C = HARD_CONSTRAINT_PENALTY; 
-    double tp = 0.2; 
+    long long C = HARD_CONSTRAINT_PENALTY; double tp = 0.2; 
     int num_independent_runs = 1; 
     long long smax = 200;
 
-    if(instance.num_events >= 400 && instance.num_students >= 200 && instance.num_rooms >= 10 && instance.num_students < 400 && instance.num_features < 6) {
+    if(instance.num_events >= 300 && instance.num_students >= 200 && instance.num_rooms >= 10 && instance.num_students < 400 && instance.num_features < 6) {
         time_limit_sec = 900; num_independent_runs = 1; smax = 1000;
     } else if (instance.num_events >= 400 && instance.num_students >= 200 && instance.num_rooms >= 10) {
         time_limit_sec = 9000; num_independent_runs = 1; smax = 2000;
     }
 
-    std::cout << "Configured settings\n  dataset: " << filename 
-              << "\n  time limit (sec): " << time_limit_sec 
-              << "\n  independent runs: " << num_independent_runs 
-              << "\n  max iterations (smax): " << smax << "\n\n";
+    std::cout << "Configured settings\n  dataset: " << filename << "\n  time limit (sec): " << time_limit_sec << "\n  independent runs: " << num_independent_runs << "\n  max iterations (smax): " << smax << "\n\n";
 
-    // 3. Create the directory provided by the --output flag
-    // (We removed the old hardcoded "timetables/" + getTimestampString() logic)
     std::filesystem::create_directories(base_folder);
-    
     std::vector<long long> fitness_results, hcv_results, scv_results, generation_results;
+    
     std::cout << "Starting " << num_independent_runs << " independent runs...\n";
+
     std::vector<std::future<std::tuple<Individual, long long, std::vector<long long>>>> futures;
     std::vector<unsigned int> seeds(num_independent_runs);
 

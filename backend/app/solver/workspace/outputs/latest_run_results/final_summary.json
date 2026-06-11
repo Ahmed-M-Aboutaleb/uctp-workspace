@@ -1,9 +1,9 @@
 {
   "configuration": {
     "dataset": "/app/app/solver/workspace/inputs/latest_run.dat",
-    "events": 71,
-    "rooms": 17,
-    "students": 203,
+    "events": 60,
+    "rooms": 15,
+    "students": 200,
     "timeslots": 45,
     "time_limit_sec": 90,
     "tp_percentage": 0.2,
@@ -11,9 +11,9 @@
   },
   "statistical_results": {
     "overall_fitness": {
-      "best": 96,
-      "worst": 96,
-      "mean": 96,
+      "best": 109,
+      "worst": 109,
+      "mean": 109,
       "stddev": 0
     },
     "hard_constraint_violations": {
@@ -23,15 +23,15 @@
       "stddev": 0
     },
     "soft_constraint_violations": {
-      "best": 96,
-      "worst": 96,
-      "mean": 96,
+      "best": 109,
+      "worst": 109,
+      "mean": 109,
       "stddev": 0
     },
     "generations_passed": {
-      "best": 1117,
-      "worst": 1117,
-      "mean": 1117,
+      "best": 5529,
+      "worst": 5529,
+      "mean": 5529,
       "stddev": 0
     }
   }
