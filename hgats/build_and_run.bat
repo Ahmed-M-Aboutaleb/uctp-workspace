@@ -4,7 +4,7 @@ echo ================================
 echo   Building HGATS Project...
 echo ================================
 
-cd /d "D:\Graduation Project\HGATS_CPP_V2"
+cd /d "D:\GitHub\uctp-workspace\hgats"
 
 echo.
 echo [1/3] Running CMake configure...

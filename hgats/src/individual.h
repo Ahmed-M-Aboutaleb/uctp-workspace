@@ -2,6 +2,7 @@
 #include "problem.h"
 #include <vector>
 #include <limits>
+using namespace std;
 
 // ─────────────────────────────────────────────────────────────────────────────
 //  A single timetable solution
@@ -14,7 +15,7 @@ struct Assignment {
 };
 
 struct Individual {
-    std::vector<Assignment> assignment;   // size = numEvents
+    vector<Assignment> assignment;   // size = numEvents
     int distanceToFeasibility = 0;        // Df  (hard constraint violations)
     int softConstraintPenalty = 0;        // SCP (soft constraint violations)
     int fitness               = 0;        // combined: Df * BIG + SCP
