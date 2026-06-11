@@ -18,8 +18,8 @@ export default async function InstructorDashboard() {
 
   const myCourses: Course[] = profileData
     ? allCourses.filter((c: Course) =>
-        c.instructors.some((inst) => inst.user_id === profileData.user_id)
-      )
+      c.instructors.some((inst) => inst.instructor_id === profileData.user_id)
+    )
     : []
 
   return <InstructorStateGrid profile={profileData} myCourses={myCourses} />

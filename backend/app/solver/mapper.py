@@ -83,9 +83,8 @@ class TimetableMapper:
             # BLOCK 7: Precedence Rules Matrix (num_events x num_events)
             for course in active_courses:
                 for other_course in active_courses:
-                    idx = active_courses.index(other_course)
-                    if course.precedence_rules and len(course.precedence_rules) > idx:
-                        f.write(f"{course.precedence_rules[idx]}\n")
+                    if course.precedence_rules and other_course.course_id in course.precedence_rules:
+                        f.write("1\n")
                     else:
                         f.write("0\n")
 

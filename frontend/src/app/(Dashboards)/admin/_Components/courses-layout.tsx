@@ -60,8 +60,14 @@ export default function CoursesLayout({
     const [isLoadingEnrollments, setIsLoadingEnrollments] = useState(false)
     const [selectedCourseName, setSelectedCourseName] = useState("")
 
-    const { register, handleSubmit, reset, formState: { errors } } = useForm<CreateCourseData>()
+    const { register, handleSubmit, reset, setValue, watch, formState: { errors } } = useForm<CreateCourseData>({
+        defaultValues: {
+            course_availability: Array(45).fill(1),
+            precedence_rules: []
+        }
+    })
 
+    const watchAvailability = watch("course_availability", Array(45).fill(1)) || Array(45).fill(1);
     const filteredData = data
         .filter(item =>
             item.course_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -89,17 +95,23 @@ export default function CoursesLayout({
             setEditingItem(item)
             reset({
                 course_name: item.course_name,
+                is_enrollment_open: item.is_enrollment_open || false,
                 student_ids: item.students?.map(s => s.student_id) || [],
                 instructor_ids: item.instructors?.map(i => i.instructor_id) || [],
-                feature_ids: item.features?.map(f => f.feature_id) || []
+                feature_ids: item.features?.map(f => f.feature_id) || [],
+                course_availability: item.course_availability && item.course_availability.length === 45 ? item.course_availability : Array(45).fill(1),
+                precedence_rules: item.precedence_rules || []
             })
         } else {
             setEditingItem(null)
             reset({
                 course_name: "",
+                is_enrollment_open: false,
                 student_ids: [],
                 instructor_ids: [],
-                feature_ids: []
+                feature_ids: [],
+                course_availability: Array(45).fill(1),
+                precedence_rules: []
             })
         }
         setIsDialogOpen(true)
@@ -128,7 +140,9 @@ export default function CoursesLayout({
                 ...formData,
                 student_ids: (formData.student_ids || []).map(Number),
                 instructor_ids: (formData.instructor_ids || []).map(Number),
-                feature_ids: (formData.feature_ids || []).map(Number)
+                feature_ids: (formData.feature_ids || []).map(Number),
+                precedence_rules: (formData.precedence_rules || []).map(Number),
+                course_availability: formData.course_availability || Array(45).fill(1)
             }
 
             if (editingItem) {
@@ -152,7 +166,7 @@ export default function CoursesLayout({
     }
 
     const confirmDelete = async () => {
-        
+
         if (!itemToDelete) return
         setIsSubmitting(true)
         try {
@@ -451,6 +465,23 @@ export default function CoursesLayout({
                         )}
                     </div>
 
+                    <div className="space-y-1.5">
+                        <label className="flex items-center gap-3 p-3 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 cursor-pointer transition-all">
+                            <div className="relative flex items-center justify-center">
+                                <input
+                                    type="checkbox"
+                                    {...register("is_enrollment_open")}
+                                    className="peer h-5 w-5 opacity-0 absolute cursor-pointer"
+                                />
+                                <div className="h-5 w-10 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-indigo-600"></div>
+                            </div>
+                            <div>
+                                <div className="text-sm font-bold text-slate-800">Enrollment Open</div>
+                                <div className="text-xs text-slate-500">Allow students to enroll in this course automatically.</div>
+                            </div>
+                        </label>
+                    </div>
+
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         {/* Instructors */}
                         <div className="space-y-3">
@@ -510,6 +541,71 @@ export default function CoursesLayout({
                                     <span className="text-sm text-slate-600 font-medium">{feat.feature_name}</span>
                                 </label>
                             ))}
+                        </div>
+                    </div>
+
+                    {/* Precedence Rules */}
+                    <div className="space-y-3">
+                        <div className="flex items-center gap-2 text-[11px] font-bold text-slate-500 uppercase tracking-wider ml-1">
+                            <Layers className="h-3.5 w-3.5" /> Prerequisite Courses
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 p-3 rounded-2xl bg-slate-50 border border-slate-100 max-h-[150px] overflow-y-auto shadow-inner">
+                            {data.filter(c => c.course_id !== editingItem?.course_id).map((c) => (
+                                <label key={c.course_id} className="flex items-center gap-3 p-2 rounded-lg hover:bg-white hover:shadow-sm cursor-pointer transition-all">
+                                    <div className="relative flex items-center justify-center">
+                                        <input type="checkbox" value={c.course_id} {...register("precedence_rules")} className="peer h-5 w-5 opacity-0 absolute cursor-pointer" />
+                                        <div className="h-5 w-5 border-2 border-slate-300 rounded-md peer-checked:border-indigo-600 peer-checked:bg-indigo-600 flex items-center justify-center">
+                                            <CheckCircle2 className="h-3.5 w-3.5 text-white scale-0 peer-checked:scale-100 transition-transform" />
+                                        </div>
+                                    </div>
+                                    <span className="text-sm text-slate-600 font-medium truncate">{c.course_name}</span>
+                                </label>
+                            ))}
+                            {data.filter(c => c.course_id !== editingItem?.course_id).length === 0 && (
+                                <span className="text-xs text-slate-400 italic">No other courses available</span>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Course Availability Grid */}
+                    <div className="space-y-3">
+                        <div className="flex items-center gap-2 text-[11px] font-bold text-slate-500 uppercase tracking-wider ml-1">
+                            <Layers className="h-3.5 w-3.5" /> Weekly Availability
+                        </div>
+                        <div className="p-3 rounded-2xl bg-slate-50 border border-slate-100 overflow-x-auto shadow-inner">
+                            <div className="min-w-[400px]">
+                                <div className="grid grid-cols-5 gap-1 mb-1">
+                                    {['Mon', 'Tue', 'Wed', 'Thu', 'Fri'].map(day => (
+                                        <div key={day} className="text-center text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                                            {day}
+                                        </div>
+                                    ))}
+                                </div>
+                                <div className="grid grid-rows-9 gap-1">
+                                    {Array.from({ length: 9 }).map((_, slotIdx) => (
+                                        <div key={`slot-${slotIdx}`} className="grid grid-cols-5 gap-1">
+                                            {Array.from({ length: 5 }).map((_, dayIdx) => {
+                                                const flatIdx = dayIdx * 9 + slotIdx; // Column-major if 45 slots are grouped by day. Wait, usually timeslots are 5 days * 9 slots. We'll map them sequentially: Monday slots 0-8, Tuesday 9-17, etc.
+                                                const isAvailable = watchAvailability[flatIdx] === 1;
+                                                return (
+                                                    <button
+                                                        key={flatIdx}
+                                                        type="button"
+                                                        onClick={() => {
+                                                            const newAvail = [...watchAvailability];
+                                                            newAvail[flatIdx] = isAvailable ? 0 : 1;
+                                                            setValue("course_availability", newAvail, { shouldDirty: true });
+                                                        }}
+                                                        className={`h-8 rounded-md text-[10px] font-bold transition-all ${isAvailable ? 'bg-indigo-100 text-indigo-700 hover:bg-indigo-200' : 'bg-white border border-slate-200 text-slate-400 hover:bg-slate-50'}`}
+                                                    >
+                                                        Slot {slotIdx + 1}
+                                                    </button>
+                                                );
+                                            })}
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
                         </div>
                     </div>
 

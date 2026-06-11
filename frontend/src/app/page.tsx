@@ -4,16 +4,16 @@ import { redirect } from "next/navigation";
 
 export default function Home() {
   const { role } = useUserData().user;
-  const {token} = useUserData().user;
-  if (role === "admin"){
+  const { token } = useUserData().user;
+  if (role === "admin") {
     redirect("/admin");
-  }else if (role === "instructor"){
+  } else if (role === "instructor") {
     redirect("/instructor")
-  }else if (role === "student"){
+  } else if (role === "student") {
     redirect("/student")
   }
 
-  if(!token){
+  if (!token) {
     redirect("/login")
   }
 }

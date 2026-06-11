@@ -2,13 +2,13 @@
 
 import { cookies } from "next/headers";
 
-export async function setToken(token:string): Promise<void> {
+export async function setToken(token: string): Promise<void> {
     const cookieStore = await cookies();
-        cookieStore.set("token", token, {
-            httpOnly:true,
-            maxAge:30*24*60*60
-        });
-    
+    cookieStore.set("token", token, {
+        httpOnly: true,
+        maxAge: 30 * 24 * 60 * 60
+    });
+
 }
 
 export async function removeToken(): Promise<void> {
@@ -23,6 +23,6 @@ export async function getToken(): Promise<string | undefined> {
 }
 
 export async function deleteToken() {
-  const cookieStore = await cookies()
-  cookieStore.delete("token")
+    const cookieStore = await cookies()
+    cookieStore.delete("token")
 }

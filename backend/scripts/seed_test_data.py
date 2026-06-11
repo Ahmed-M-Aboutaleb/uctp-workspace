@@ -81,7 +81,7 @@ def seed_database(db: Session):
             course_name=f"{random.choice(course_prefixes)} {random.randint(100, 499)}",
             is_enrollment_open=False, # Closed for solver
             course_availability=[1] * 45,
-            precedence_rules=[0] * 60,
+            precedence_rules=[],
             instructors=course_instructors,
             features=course_features,
             students=[] # We will append students next

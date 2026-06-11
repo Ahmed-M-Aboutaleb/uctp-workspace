@@ -11,9 +11,9 @@
   },
   "statistical_results": {
     "overall_fitness": {
-      "best": 109,
-      "worst": 109,
-      "mean": 109,
+      "best": 111,
+      "worst": 111,
+      "mean": 111,
       "stddev": 0
     },
     "hard_constraint_violations": {
@@ -23,15 +23,15 @@
       "stddev": 0
     },
     "soft_constraint_violations": {
-      "best": 109,
-      "worst": 109,
-      "mean": 109,
+      "best": 111,
+      "worst": 111,
+      "mean": 111,
       "stddev": 0
     },
     "generations_passed": {
-      "best": 5529,
-      "worst": 5529,
-      "mean": 5529,
+      "best": 6381,
+      "worst": 6381,
+      "mean": 6381,
       "stddev": 0
     }
   }

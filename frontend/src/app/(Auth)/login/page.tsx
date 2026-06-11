@@ -1,12 +1,12 @@
 'use client'
 
 import { useUserData } from '@/context/UserData'
-import { setToken } from '@/cookies/auth.actions'
+import { removeToken, setToken } from '@/cookies/auth.actions'
 import { LoginSchema, LoginType } from '@/schema/AuthScheema'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { ArrowRight, Eye, EyeOff, GraduationCap, IdCard, Lock } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'react-toastify'
 import { Bounce } from "react-toastify/unstyled"
@@ -14,33 +14,37 @@ import { Bounce } from "react-toastify/unstyled"
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const {setUser}=useUserData();
+  const { setUser } = useUserData();
   const router = useRouter();
 
 
-  const {register,handleSubmit,reset,setError,formState}=useForm<LoginType>({
+  const { register, handleSubmit, reset, setError, formState } = useForm<LoginType>({
     resolver: zodResolver(LoginSchema),
-    defaultValues:{
-      username:'',
-      password:''
+    defaultValues: {
+      username: '',
+      password: ''
     },
-    mode:'onSubmit'
+    mode: 'onSubmit'
   });
 
+  useEffect(() => {
+    removeToken();
+  }, []);
 
-  async function onSubmit(data:LoginType){
-  setIsLoading(true);
-  const formData = new URLSearchParams();
-  formData.append('username', data.username);
-  formData.append('password', data.password);
-    try{
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/login`,{
-        method:'post',
-          headers: { "Content-Type": "application/x-www-form-urlencoded" },
-          body: formData,
+
+  async function onSubmit(data: LoginType) {
+    setIsLoading(true);
+    const formData = new URLSearchParams();
+    formData.append('username', data.username);
+    formData.append('password', data.password);
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/login`, {
+        method: 'post',
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: formData,
       });
-          const result =await res.json();
-        if (result.access_token) {
+      const result = await res.json();
+      if (result.access_token) {
         toast.success('Account logged in successfully!', {
           position: "top-right",
           autoClose: 2000,
@@ -51,7 +55,7 @@ export default function LoginPage() {
           progress: undefined,
           theme: "light",
           transition: Bounce,
-}); 
+        });
 
         setUser({
           token: result.access_token,
@@ -66,12 +70,12 @@ export default function LoginPage() {
         setTimeout(() => {
           router.push("/");
         }, 2000);
-    }else{
-      throw new Error(result.detail || "Login failed");
-    }
-}catch(err:any){
-      setError('password',{message:err.message || "Invalid email or password"});
-    }finally{
+      } else {
+        throw new Error(result.detail || "Login failed");
+      }
+    } catch (err: any) {
+      setError('password', { message: err.message || "Invalid email or password" });
+    } finally {
       setIsLoading(false);
     }
   }
@@ -108,7 +112,7 @@ export default function LoginPage() {
           <p className="text-white/80 mt-4 max-w-md">
             Access your academic dashboard, connect with faculty, and manage your university journey securely.
           </p>
-          
+
           {/* Decorative Grid Pattern */}
           <div className="mt-8 flex gap-4">
             <div className="grid grid-cols-5 ">
@@ -153,7 +157,7 @@ export default function LoginPage() {
                   </div>
                   <input
                     type="text"
-                      {...register('username')}
+                    {...register('username')}
                     placeholder="e.g. 12345678"
                     className="w-full pl-12 pr-4 py-4 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#5B6EE1] focus:border-transparent transition-all"
                   />
@@ -187,7 +191,7 @@ export default function LoginPage() {
                   >
                     {showPassword ? (
                       <EyeOff className="h-5 w-5" />
-                    ) :  (
+                    ) : (
                       <Eye className="h-5 w-5" />
                     )}
                   </button>

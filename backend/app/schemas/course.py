@@ -11,6 +11,9 @@ class CourseCreate(CourseBase):
     student_ids: Optional[List[int]] = []
     instructor_ids: Optional[List[int]] = []
     feature_ids: Optional[List[int]] = []
+    is_enrollment_open: Optional[bool] = False
+    course_availability: Optional[List[int]] = None
+    precedence_rules: Optional[List[int]] = None
 
 class CourseUpdate(BaseModel):
     course_name: Optional[str] = None

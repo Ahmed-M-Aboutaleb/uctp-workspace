@@ -19,7 +19,14 @@ def create_course(
     current_admin: User = Depends(get_current_admin)
 ):
     """Create a new course and link its instructors, students, and required features."""
-    course = Course(course_name=course_in.course_name)
+    course = Course(
+        course_name=course_in.course_name,
+        is_enrollment_open=course_in.is_enrollment_open
+    )
+    if course_in.course_availability is not None:
+        course.course_availability = course_in.course_availability
+    if course_in.precedence_rules is not None:
+        course.precedence_rules = course_in.precedence_rules
     
     # 1. Attach Instructors
     if course_in.instructor_ids:
@@ -81,6 +88,15 @@ def update_course(
     
     if update_in.course_name is not None:
         course.course_name = update_in.course_name
+        
+    if update_in.is_enrollment_open is not None:
+        course.is_enrollment_open = update_in.is_enrollment_open
+        
+    if update_in.course_availability is not None:
+        course.course_availability = update_in.course_availability
+        
+    if update_in.precedence_rules is not None:
+        course.precedence_rules = update_in.precedence_rules
         
     if update_in.instructor_ids is not None:
         instructors = db.query(Instructor).filter(Instructor.instructor_id.in_(update_in.instructor_ids)).all()

@@ -1,7 +1,7 @@
 export type TimetableEntry = {
-    message: string;
-    job_id: string;
-    status: string;
+  message: string;
+  job_id: string;
+  status: string;
 }
 
 
@@ -29,7 +29,10 @@ export interface Course {
   course_name: string;
   instructors: Instructor[];
   students: Student[];
-  features: Feature[]; 
+  features: Feature[];
+  is_enrollment_open: boolean;
+  course_availability: number[];
+  precedence_rules: number[];
 }
 
 export interface Room {
