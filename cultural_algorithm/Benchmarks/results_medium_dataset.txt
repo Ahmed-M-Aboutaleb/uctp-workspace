@@ -1,0 +1,5 @@
+========== RESULT ==========
+Hard violations: 0
+Soft violations: 47
+Fitness        : 47
+Feasible       : YES

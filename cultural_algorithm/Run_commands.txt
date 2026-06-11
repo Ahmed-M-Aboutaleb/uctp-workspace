@@ -1,0 +1,13 @@
+g++ -std=c++17 -O2 -I include/core -I include/algorithm -o gsnsga2 main.cpp
+
+Single run:
+./gsnsga2 data/socha/small1.txt 100 300
+
+20 runs (variable seeds):
+./gsnsga2 data/socha/small1.txt 100 300 --runs 20
+
+20 runs (fixed seed):
+./gsnsga2 data/socha/small1.txt 100 300 --runs 20 --fixed-seed
+
+Single run with specific seed:
+./gsnsga2 data/socha/small1.txt 100 300 --seed 49

@@ -1,0 +1,6 @@
+Done. Generations=91515 best=191 (hard=0 soft=191)
+========== RESULT ==========
+Hard violations: 0
+Soft violations: 191
+Fitness        : 191
+Feasible       : YES
