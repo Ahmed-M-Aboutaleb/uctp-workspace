@@ -6,6 +6,8 @@
 #include "problem.h"
 #include "individual.h"
 
+using namespace std;
+
 struct RoomTimePair {
     int room;
     int timeslot;
@@ -20,7 +22,7 @@ public:
         lists.resize(p.numEvents);
     }
 
-    void construct(const std::vector<Individual>& population,
+    void construct(const vector<Individual>& population,
                    double alpha,
                    const Evaluator& eval);
 
@@ -32,10 +34,10 @@ public:
 
 private:
     const Problem& prob;
-    std::vector<std::vector<RoomTimePair>> lists;
+    vector<vector<RoomTimePair>> lists;
 
     int eventPenaltyFast(const Individual& ind, int e,
-                         const std::vector<std::vector<int>>& tsIdx) const;
+                         const vector<vector<int>>& tsIdx) const;
 
-    mutable std::mt19937 rng{std::random_device{}()};
+    mutable mt19937 rng{random_device{}()};
 };

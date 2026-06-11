@@ -6,11 +6,13 @@
 #include <numeric>
 #include <random>
 
+using namespace std;
+
 GSGA::GSGA(const Problem& p, const Params& par)
-    : prob(p), params(par), eval(p), ls(p, eval), mem(p) {}
+    : prob(p), params(par), eval(p), ls(p, eval), mem(p), rng(par.seed) {}
 
 Individual GSGA::run() {
-    auto startTime = std::chrono::steady_clock::now();
+    auto startTime = chrono::steady_clock::now();
 
     population.clear();
     population.reserve(params.populationSize);
@@ -21,7 +23,7 @@ Individual GSGA::run() {
         ls.applyLS4(ind);
         eval.evaluate(ind);
         population.push_back(ind);
-        std::cout << "[Init] Individual " << i
+        cout << "[Init] Individual " << i
                   << "  Df=" << ind.distanceToFeasibility
                   << "  SCP=" << ind.softConstraintPenalty << "\n";
     }
@@ -30,34 +32,34 @@ Individual GSGA::run() {
 
     generation        = 0;
     int noImprov      = 0;
-    int lastBestFit   = std::min_element(
+    int lastBestFit   = min_element(
         population.begin(), population.end())->fitness;
 
     while (true) {
-        auto now = std::chrono::steady_clock::now();
+        auto now = chrono::steady_clock::now();
         double elapsed =
-            std::chrono::duration<double>(now - startTime).count();
+            chrono::duration<double>(now - startTime).count();
         if (elapsed >= params.timeLimitSec) break;
         if (generation >= params.maxGenerations)  break;
 
         if (generation > 0 && generation % params.tau == 0)
             constructMEM();
 
-        std::uniform_real_distribution<double> uni(0.0, 1.0);
+        uniform_real_distribution<double> uni(0.0, 1.0);
 
         Individual child = (uni(rng) < params.gamma)
-                           ? guidedSearch()
-                           : biasedCrossover();
+                            ? guidedSearch()
+                            : biasedCrossover();
 
         // diversity-aware mutation
         {
-            int bestDf  = std::min_element(
+            int bestDf  = min_element(
                 population.begin(), population.end())->distanceToFeasibility;
-            int worstDf = std::max_element(
+            int worstDf = max_element(
                 population.begin(), population.end())->distanceToFeasibility;
             bool lowDiv = (worstDf - bestDf) < 5;
             double pm   = lowDiv
-                          ? std::min(0.9, params.Pm * 2.0)
+                          ? min(0.9, params.Pm * 2.0)
                           : params.Pm;
             if (uni(rng) < pm) mutate(child);
         }
@@ -69,7 +71,7 @@ Individual GSGA::run() {
         population[worstIndex()] = child;
 
         // stagnation → partial restart
-        int curBest = std::min_element(
+        int curBest = min_element(
             population.begin(), population.end())->fitness;
         if (curBest < lastBestFit) {
             lastBestFit = curBest;
@@ -81,24 +83,24 @@ Individual GSGA::run() {
         if (noImprov >= params.stagnationLimit) {
             partialRestart();
             noImprov    = 0;
-            lastBestFit = std::min_element(
+            lastBestFit = min_element(
                 population.begin(), population.end())->fitness;
             constructMEM();
         }
 
         if (isOptimal(child)) {
-            std::cout << "[GSGA] Optimal found at gen="
+            cout << "[GSGA] Optimal found at gen="
                       << generation << "\n";
             break;
         }
 
         if (generation % 100 == 0) {
-            const Individual& best = *std::min_element(
+            const Individual& best = *min_element(
                 population.begin(), population.end());
-            auto now2 = std::chrono::steady_clock::now();
+            auto now2 = chrono::steady_clock::now();
             double el =
-                std::chrono::duration<double>(now2 - startTime).count();
-            std::cout << "[GSGA] Gen=" << generation
+                chrono::duration<double>(now2 - startTime).count();
+            cout << "[GSGA] Gen=" << generation
                       << "  Df="  << best.distanceToFeasibility
                       << "  SCP=" << best.softConstraintPenalty
                       << "  Time=" << (int)el << "s\n";
@@ -107,7 +109,7 @@ Individual GSGA::run() {
         ++generation;
     }
 
-    return *std::min_element(population.begin(), population.end());
+    return *min_element(population.begin(), population.end());
 }
 
 Individual GSGA::initializeIndividual() {
@@ -119,7 +121,7 @@ Individual GSGA::initializeIndividual() {
                             ? prob.events[e].availableTimeSlots
                             : prob.T0_slots;
         if (!avail.empty()) {
-            std::uniform_int_distribution<int> dt(0, (int)avail.size() - 1);
+            uniform_int_distribution<int> dt(0, (int)avail.size() - 1);
             ind.assignment[e] = {avail[dt(rng)], -1};
         } else {
             ind.assignment[e] = {0, -1};
@@ -140,24 +142,24 @@ Individual GSGA::guidedSearch() {
     child.init(prob.numEvents);
 
     // pick random individual from top 30%
-    std::vector<int> idx(population.size());
-    std::iota(idx.begin(), idx.end(), 0);
-    std::sort(idx.begin(), idx.end(), [&](int a, int b) {
+    vector<int> idx(population.size());
+    iota(idx.begin(), idx.end(), 0);
+    sort(idx.begin(), idx.end(), [&](int a, int b) {
         return population[a].fitness < population[b].fitness;
     });
-    int topK = std::max(1, (int)(population.size() * 0.3));
-    std::uniform_int_distribution<int> dtop(0, topK - 1);
+    int topK = max(1, (int)(population.size() * 0.3));
+    uniform_int_distribution<int> dtop(0, topK - 1);
     const Individual& base = population[idx[dtop(rng)]];
 
-    int numToGuide = std::max(1,
+    int numToGuide = max(1,
         (int)(params.beta * (int)prob.E0_events.size()));
 
-    std::vector<int> E0_copy = prob.E0_events;
-    std::shuffle(E0_copy.begin(), E0_copy.end(), rng);
+    vector<int> E0_copy = prob.E0_events;
+    shuffle(E0_copy.begin(), E0_copy.end(), rng);
     if ((int)E0_copy.size() > numToGuide)
         E0_copy.resize(numToGuide);
 
-    std::vector<bool> guided(prob.numEvents, false);
+    vector<bool> guided(prob.numEvents, false);
     for (int e : E0_copy) guided[e] = true;
 
     for (int e : E0_copy) {
@@ -165,7 +167,7 @@ Individual GSGA::guidedSearch() {
             auto p = mem.randomPairFor(e);
             child.assignment[e] = {p.timeslot, -1};
         } else {
-            std::uniform_int_distribution<int>
+            uniform_int_distribution<int>
                 dt(0, (int)prob.T0_slots.size() - 1);
             child.assignment[e] = {prob.T0_slots[dt(rng)], -1};
         }
@@ -187,8 +189,8 @@ Individual GSGA::biasedCrossover() {
     while (p2 == p1) p2 = tournamentSelect();
 
     // build tsIndex once per parent
-    std::vector<std::vector<int>> tsIdx1(prob.numTimeslots);
-    std::vector<std::vector<int>> tsIdx2(prob.numTimeslots);
+    vector<vector<int>> tsIdx1(prob.numTimeslots);
+    vector<vector<int>> tsIdx2(prob.numTimeslots);
     for (int e = 0; e < prob.numEvents; ++e) {
         int ts1 = population[p1].assignment[e].timeslot;
         int ts2 = population[p2].assignment[e].timeslot;
@@ -216,8 +218,8 @@ Individual GSGA::biasedCrossover() {
 }
 
 void GSGA::mutate(Individual& ind) {
-    std::uniform_int_distribution<int> dn(1, 4);
-    std::uniform_int_distribution<int> de(0, prob.numEvents - 1);
+    uniform_int_distribution<int> dn(1, 4);
+    uniform_int_distribution<int> de(0, prob.numEvents - 1);
     int nb       = dn(rng);
     int e        = de(rng);
     bool fixHard = (ind.distanceToFeasibility > 0);
@@ -231,11 +233,11 @@ void GSGA::mutate(Individual& ind) {
 }
 
 void GSGA::partialRestart() {
-    int keepCount = std::max(1, (int)(population.size() * 0.3));
+    int keepCount = max(1, (int)(population.size() * 0.3));
 
-    std::vector<int> idx(population.size());
-    std::iota(idx.begin(), idx.end(), 0);
-    std::sort(idx.begin(), idx.end(), [&](int a, int b) {
+    vector<int> idx(population.size());
+    iota(idx.begin(), idx.end(), 0);
+    sort(idx.begin(), idx.end(), [&](int a, int b) {
         return population[a].fitness < population[b].fitness;
     });
 
@@ -249,20 +251,20 @@ void GSGA::partialRestart() {
 }
 
 int GSGA::tournamentSelect() const {
-    std::uniform_int_distribution<int> di(0, (int)population.size() - 1);
+    uniform_int_distribution<int> di(0, (int)population.size() - 1);
     int a = di(rng);
     int b = di(rng);
     return (population[a].fitness <= population[b].fitness) ? a : b;
 }
 
 int GSGA::worstIndex() const {
-    std::vector<int> idx(population.size());
-    std::iota(idx.begin(), idx.end(), 0);
-    std::sort(idx.begin(), idx.end(), [&](int a, int b) {
+    vector<int> idx(population.size());
+    iota(idx.begin(), idx.end(), 0);
+    sort(idx.begin(), idx.end(), [&](int a, int b) {
         return population[a].fitness > population[b].fitness;
     });
-    int bottomK = std::max(1, (int)(population.size() * 0.5));
-    std::uniform_int_distribution<int> d(0, bottomK - 1);
+    int bottomK = max(1, (int)(population.size() * 0.5));
+    uniform_int_distribution<int> d(0, bottomK - 1);
     return idx[d(rng)];
 }
 
@@ -272,18 +274,18 @@ bool GSGA::isOptimal(const Individual& ind) const {
 }
 
 int GSGA::eventPenaltyFast(const Individual& ind, int e,
-                            const std::vector<std::vector<int>>& tsIdx) const {
+                            const vector<vector<int>>& tsIdx) const {
     const auto& a = ind.assignment[e];
     if (a.timeslot < 0 || a.room < 0) return 1000;
 
     int pen = 0;
 
     const auto& sr = prob.events[e].suitableRooms;
-    if (std::find(sr.begin(), sr.end(), a.room) == sr.end()) ++pen;
+    if (find(sr.begin(), sr.end(), a.room) == sr.end()) ++pen;
 
     if (prob.events[e].hasTimeRestriction) {
         const auto& avail = prob.events[e].availableTimeSlots;
-        if (std::find(avail.begin(), avail.end(), a.timeslot) == avail.end())
+        if (find(avail.begin(), avail.end(), a.timeslot) == avail.end())
             ++pen;
     }
 

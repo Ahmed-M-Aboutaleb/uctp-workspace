@@ -6,16 +6,18 @@
 #include <random>
 #include <numeric>
 
+using namespace std;
+
 TabuSearch::TabuSearch(const Problem& p, const Params& par)
     : prob(p), params(par), eval(p), ls(p, eval) {
-    tabuListLength = std::max(1,
+    tabuListLength = max(1,
         prob.numEvents / params.tabuListK);
-    params.maxNeighbors = std::max(1,
+    params.maxNeighbors = max(1,
         (int)(prob.numEvents * 0.30));
 }
 
 Individual TabuSearch::run(const Individual& startSolution) {
-    auto startTime = std::chrono::steady_clock::now();
+    auto startTime = chrono::steady_clock::now();
 
     Individual current = startSolution;
     Individual best    = startSolution;
@@ -26,28 +28,28 @@ Individual TabuSearch::run(const Individual& startSolution) {
 
     int iter         = 0;
     int noImprov     = 0;
-    int perturbCount = 0;  // خارج الـ stagnation block
+    int perturbCount = 0;
 
     while (true) {
-        auto now = std::chrono::steady_clock::now();
+        auto now = chrono::steady_clock::now();
         double elapsed =
-            std::chrono::duration<double>(now - startTime).count();
+            chrono::duration<double>(now - startTime).count();
         if (elapsed >= params.timeLimitSec) break;
 
         if (best.distanceToFeasibility == 0 &&
             best.softConstraintPenalty  == 0) {
-            std::cout << "[TS] Optimal at iter=" << iter << "\n";
+            cout << "[TS] Optimal at iter=" << iter << "\n";
             break;
         }
 
         if (noImprov >= params.stagnationLimit) {
-            ++perturbCount;  // يزيد هنا مش بيتـ reset
+            ++perturbCount;
 
-            tabuListLength = std::min(
+            tabuListLength = min(
                 prob.numEvents / params.tabuListK + perturbCount * 5,
                 prob.numEvents / 3);
 
-            std::cout << "[TS] Stagnation at iter=" << iter
+            cout << "[TS] Stagnation at iter=" << iter
                       << "  Df=" << best.distanceToFeasibility
                       << "  -> Perturbation #" << perturbCount
                       << "  TabuLen=" << tabuListLength << "\n";
@@ -93,12 +95,12 @@ Individual TabuSearch::run(const Individual& startSolution) {
             best     = current;
             noImprov = 0;
 
-            auto now2 = std::chrono::steady_clock::now();
-            double el = std::chrono::duration<double>(now2 - startTime).count();
-            std::cout << "[TS] Iter=" << iter
+            auto now2 = chrono::steady_clock::now();
+            double el = chrono::duration<double>(now2 - startTime).count();
+            cout << "[TS] Iter=" << iter
                       << "  Df="   << best.distanceToFeasibility
                       << "  SCP="  << best.softConstraintPenalty
-                      << "  Time=" << std::fixed << std::setprecision(1)
+                      << "  Time=" << fixed << setprecision(1)
                       << el << "s\n";
         } else {
             ++noImprov;
@@ -111,17 +113,17 @@ Individual TabuSearch::run(const Individual& startSolution) {
 }
 
 Individual TabuSearch::perturbAndRestart(const Individual& best,
-                                          LocalSearch& ls_ref) {
+                                        LocalSearch& ls_ref) {
     Individual perturbed = best;
-    std::uniform_int_distribution<int> de(0, prob.numEvents - 1);
-    int numMoves = std::max(5, prob.numEvents / 20);
+    uniform_int_distribution<int> de(0, prob.numEvents - 1);
+    int numMoves = max(5, prob.numEvents / 20);
     for (int i = 0; i < numMoves; ++i) {
         int e = de(rng);
         const auto& avail = prob.events[e].hasTimeRestriction
                             ? prob.events[e].availableTimeSlots
                             : prob.T0_slots;
         if (!avail.empty()) {
-            std::uniform_int_distribution<int>
+            uniform_int_distribution<int>
                 da(0, (int)avail.size() - 1);
             perturbed.assignment[e].timeslot = avail[da(rng)];
             perturbed.assignment[e].room = -1;
@@ -135,13 +137,13 @@ Individual TabuSearch::perturbAndRestart(const Individual& best,
     return perturbed;
 }
 
-std::vector<TabuSearch::Move>
+vector<TabuSearch::Move>
 TabuSearch::generateNeighbors(const Individual& ind,
                                int numToCheck) const {
-    std::vector<Move> moves;
+    vector<Move> moves;
     moves.reserve(numToCheck);
 
-    std::vector<std::vector<int>> tsIdx(prob.numTimeslots);
+    vector<vector<int>> tsIdx(prob.numTimeslots);
     for (int e = 0; e < prob.numEvents; ++e) {
         int ts = ind.assignment[e].timeslot;
         if (ts >= 0 && ts < prob.numTimeslots)
@@ -162,13 +164,13 @@ TabuSearch::generateNeighbors(const Individual& ind,
         return -1;
     };
 
-    std::uniform_real_distribution<double> uni(0.0, 1.0);
-    std::uniform_int_distribution<int>
+    uniform_real_distribution<double> uni(0.0, 1.0);
+    uniform_int_distribution<int>
         de(0, prob.numEvents - 1);
-    std::uniform_int_distribution<int>
+    uniform_int_distribution<int>
         dt(0, prob.numTimeslots - 1);
 
-    std::vector<int> violatedEvents;
+    vector<int> violatedEvents;
     for (int e = 0; e < prob.numEvents; ++e) {
         const auto& a = ind.assignment[e];
         if (a.timeslot < 0) { violatedEvents.push_back(e); continue; }
@@ -180,7 +182,7 @@ TabuSearch::generateNeighbors(const Individual& ind,
             }
         }
     }
-    std::shuffle(violatedEvents.begin(), violatedEvents.end(), rng);
+    shuffle(violatedEvents.begin(), violatedEvents.end(), rng);
 
     int generated = 0;
     int maxTry    = numToCheck * 12;
@@ -196,7 +198,7 @@ TabuSearch::generateNeighbors(const Individual& ind,
         if (r < params.probN1) {
             m.type   = 1;
             if (!violatedEvents.empty() && uni(rng) < 0.7) {
-                std::uniform_int_distribution<int>
+                uniform_int_distribution<int>
                     dv(0, (int)violatedEvents.size()-1);
                 m.event1 = violatedEvents[dv(rng)];
             } else {
@@ -207,7 +209,7 @@ TabuSearch::generateNeighbors(const Individual& ind,
                                 ? prob.events[m.event1].availableTimeSlots
                                 : prob.T0_slots;
             if (avail.empty()) continue;
-            std::uniform_int_distribution<int>
+            uniform_int_distribution<int>
                 da(0, (int)avail.size() - 1);
             m.newTs1 = avail[da(rng)];
             if (m.newTs1 == ind.assignment[m.event1].timeslot) continue;
@@ -222,7 +224,7 @@ TabuSearch::generateNeighbors(const Individual& ind,
         } else if (r < params.probN1 + params.probN2) {
             m.type   = 2;
             if (!violatedEvents.empty() && uni(rng) < 0.7) {
-                std::uniform_int_distribution<int>
+                uniform_int_distribution<int>
                     dv(0, (int)violatedEvents.size()-1);
                 m.event1 = violatedEvents[dv(rng)];
             } else {
@@ -250,9 +252,9 @@ TabuSearch::generateNeighbors(const Individual& ind,
                 prob.T0_slots.size()  < 2) continue;
 
             m.type = 4;
-            std::uniform_int_distribution<int>
+            uniform_int_distribution<int>
                 de0(0, (int)prob.E0_events.size() - 1);
-            std::uniform_int_distribution<int>
+            uniform_int_distribution<int>
                 dt0(0, (int)prob.T0_slots.size()  - 1);
 
             m.event1 = prob.E0_events[de0(rng)];

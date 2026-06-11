@@ -5,7 +5,9 @@
 #include <set>
 #include <functional>
 
-static std::mt19937 rng_ls(1234);
+using namespace std;
+
+static mt19937 rng_ls(1234);
 
 // ═══════════════════════════════════════════════════════════════
 //  Timeslot Index
@@ -23,7 +25,7 @@ void LocalSearch::buildIndex(const Individual& ind) {
 void LocalSearch::moveEventInIndex(int e, int oldTs, int newTs) {
     if (oldTs >= 0 && oldTs < prob.numTimeslots) {
         auto& v = tsEvents[oldTs];
-        v.erase(std::remove(v.begin(), v.end(), e), v.end());
+        v.erase(remove(v.begin(), v.end(), e), v.end());
     }
     if (newTs >= 0 && newTs < prob.numTimeslots)
         tsEvents[newTs].push_back(e);
@@ -64,7 +66,7 @@ int LocalSearch::matchRoomGreedy(const Individual& ind,
 
 int LocalSearch::matchRoomBipartite(const Individual& ind,
                                      int target_event, int ts,
-                                     std::vector<std::pair<int,int>>& sideEffects) const {
+                                     vector<pair<int,int>>& sideEffects) const {
     if (ts < 0 || ts >= prob.numTimeslots) return -1;
     const auto& evts = tsEvents[ts];
     int n = (int)evts.size();
@@ -72,7 +74,7 @@ int LocalSearch::matchRoomBipartite(const Individual& ind,
     if (n == 0) return -1;
 
     int target_idx = -1;
-    std::vector<std::vector<int>> adj(n);
+    vector<vector<int>> adj(n);
     for (int i = 0; i < n; ++i) {
         int f = evts[i];
         if (f == target_event) target_idx = i;
@@ -82,11 +84,11 @@ int LocalSearch::matchRoomBipartite(const Individual& ind,
     }
     if (target_idx < 0) return -1;
 
-    std::vector<int> matchRoom(m, -1);
-    std::vector<int> matchEvent(n, -1);
+    vector<int> matchRoom(m, -1);
+    vector<int> matchEvent(n, -1);
 
-    std::function<bool(int, std::vector<bool>&)> augment =
-        [&](int u, std::vector<bool>& vis) -> bool {
+    function<bool(int, vector<bool>&)> augment =
+        [&](int u, vector<bool>& vis) -> bool {
             for (int r : adj[u]) {
                 if (vis[r]) continue;
                 vis[r] = true;
@@ -100,7 +102,7 @@ int LocalSearch::matchRoomBipartite(const Individual& ind,
         };
 
     for (int i = 0; i < n; ++i) {
-        std::vector<bool> vis(m, false);
+        vector<bool> vis(m, false);
         augment(i, vis);
     }
 
@@ -119,7 +121,7 @@ int LocalSearch::matchRoomBipartite(const Individual& ind,
 // Combined: try greedy first; if it fails, fall back to bipartite
 int LocalSearch::findBestRoom(const Individual& ind,
                                int e, int ts,
-                               std::vector<std::pair<int,int>>& sideEffects,
+                               vector<pair<int,int>>& sideEffects,
                                int exclude1, int exclude2) const {
     sideEffects.clear();
     int r = matchRoomGreedy(ind, e, ts, exclude1, exclude2);
@@ -133,7 +135,7 @@ int LocalSearch::findBestRoom(const Individual& ind,
 // ═══════════════════════════════════════════════════════════════
 
 void LocalSearch::assignRoomsViaMatching(Individual& ind) const {
-    std::vector<std::vector<int>> tsIdx(prob.numTimeslots);
+    vector<vector<int>> tsIdx(prob.numTimeslots);
     for (int e = 0; e < prob.numEvents; ++e) {
         int ts = ind.assignment[e].timeslot;
         if (ts >= 0 && ts < prob.numTimeslots)
@@ -146,7 +148,7 @@ void LocalSearch::assignRoomsViaMatching(Individual& ind) const {
         int n = (int)evts.size();
         int m = prob.numRooms;
 
-        std::vector<std::vector<int>> adj(n);
+        vector<vector<int>> adj(n);
         for (int i = 0; i < n; ++i) {
             int e = evts[i];
             for (int r : prob.events[e].suitableRooms)
@@ -154,11 +156,11 @@ void LocalSearch::assignRoomsViaMatching(Individual& ind) const {
                     adj[i].push_back(r);
         }
 
-        std::vector<int> matchRoom(m, -1);
-        std::vector<int> matchEvent(n, -1);
+        vector<int> matchRoom(m, -1);
+        vector<int> matchEvent(n, -1);
 
-        std::function<bool(int, std::vector<bool>&)> augment =
-            [&](int u, std::vector<bool>& vis) -> bool {
+        function<bool(int, vector<bool>&)> augment =
+            [&](int u, vector<bool>& vis) -> bool {
                 for (int r : adj[u]) {
                     if (vis[r]) continue;
                     vis[r] = true;
@@ -172,7 +174,7 @@ void LocalSearch::assignRoomsViaMatching(Individual& ind) const {
             };
 
         for (int i = 0; i < n; ++i) {
-            std::vector<bool> vis(m, false);
+            vector<bool> vis(m, false);
             augment(i, vis);
         }
 
@@ -191,11 +193,11 @@ int LocalSearch::eventHardPenaltyFast(const Individual& ind, int e) const {
     if (a.timeslot < 0 || a.room < 0) return 1;
 
     const auto& sr = prob.events[e].suitableRooms;
-    if (std::find(sr.begin(), sr.end(), a.room) == sr.end()) ++pen;
+    if (find(sr.begin(), sr.end(), a.room) == sr.end()) ++pen;
 
     if (prob.events[e].hasTimeRestriction) {
         const auto& avail = prob.events[e].availableTimeSlots;
-        if (std::find(avail.begin(), avail.end(), a.timeslot) == avail.end())
+        if (find(avail.begin(), avail.end(), a.timeslot) == avail.end())
             ++pen;
     }
 
@@ -290,12 +292,12 @@ bool LocalSearch::moveN1(Individual& ind, int e, bool fixHard) {
         if (ts == oldTs) continue;
 
         // Save rooms of events currently in target ts (for revert)
-        std::vector<std::pair<int,int>> savedRooms;
+        vector<pair<int,int>> savedRooms;
         for (int f : tsEvents[ts])
             savedRooms.push_back({f, ind.assignment[f].room});
 
         // Find room for e in ts (greedy first, bipartite fallback)
-        std::vector<std::pair<int,int>> sideEffects;
+        vector<pair<int,int>> sideEffects;
         int r = findBestRoom(ind, e, ts, sideEffects);
         if (r < 0) continue;
 
@@ -429,9 +431,9 @@ bool LocalSearch::moveN4(Individual& ind, int e, bool fixHard) {
     int currentDf = ind.distanceToFeasibility;
     bool improved = false;
 
-    std::uniform_int_distribution<int>
+    uniform_int_distribution<int>
         de(0, (int)prob.E0_events.size()-1);
-    std::uniform_int_distribution<int>
+    uniform_int_distribution<int>
         dt(0, (int)prob.T0_slots.size()-1);
 
     for (int trial = 0; trial < 10; ++trial) {
@@ -549,15 +551,15 @@ bool LocalSearch::moveN5(Individual& ind, int e) {
 // ═══════════════════════════════════════════════════════════════
 
 bool LocalSearch::moveN6(Individual& ind, int percentTS) {
-    std::vector<int> occupied;
+    vector<int> occupied;
     for (int ts = 0; ts < prob.numTimeslots; ++ts)
         if (!tsEvents[ts].empty())
             occupied.push_back(ts);
 
     if (occupied.empty()) return false;
 
-    int subsetSize = std::max(1, (int)(occupied.size() * percentTS / 100));
-    std::shuffle(occupied.begin(), occupied.end(), rng_ls);
+    int subsetSize = max(1, (int)(occupied.size() * percentTS / 100));
+    shuffle(occupied.begin(), occupied.end(), rng_ls);
     occupied.resize(subsetSize);
 
     int worstTs = occupied[0];
@@ -615,7 +617,7 @@ bool LocalSearch::eventHasSoftViolation(const Individual& ind, int e) const {
 
     int day = ts / SLOTS_PER_DAY;
     for (int s : prob.events[e].students) {
-        std::vector<int> daySlots;
+        vector<int> daySlots;
         for (int f = 0; f < prob.numEvents; ++f) {
             int fts = ind.assignment[f].timeslot;
             if (fts < 0 || fts / SLOTS_PER_DAY != day) continue;
@@ -624,7 +626,7 @@ bool LocalSearch::eventHasSoftViolation(const Individual& ind, int e) const {
             }
         }
         if ((int)daySlots.size() == 1) return true;
-        std::sort(daySlots.begin(), daySlots.end());
+        sort(daySlots.begin(), daySlots.end());
         int consec = 1;
         for (int i = 1; i < (int)daySlots.size(); ++i) {
             if (daySlots[i] == daySlots[i-1]+1) { if (++consec > 2) return true; }

@@ -3,6 +3,8 @@
 #include <string>
 #include <set>
 
+using namespace std;
+
 struct Room {
     int id;
     int capacity;
@@ -11,15 +13,15 @@ struct Room {
 struct Event {
     int              id;
     int              numStudents;
-    std::vector<int> suitableRooms;
-    std::vector<int> availableTimeSlots;
-    std::vector<int> students;
-    std::vector<int> mustBeBefore;
+    vector<int> suitableRooms;
+    vector<int> availableTimeSlots;
+    vector<int> students;
+    vector<int> mustBeBefore;
     bool             hasTimeRestriction = false;
 };
 
 struct Problem {
-    std::string name;
+    string name;
     int         numEvents    = 0;
     int         numRooms     = 0;
     int         numFeatures  = 0;
@@ -27,19 +29,19 @@ struct Problem {
     int         numStudents  = 0;
     int         slotsPerDay = 9;
 
-    std::vector<Room>  rooms;
-    std::vector<Event> events;
+    vector<Room>  rooms;
+    vector<Event> events;
 
-    std::vector<std::vector<bool>> conflict;
+    vector<vector<bool>> conflict;
 
-    std::vector<int> E0_events;
-    std::vector<int> T0_slots;
-    std::vector<int> EE;
+    vector<int> E0_events;
+    vector<int> T0_slots;
+    vector<int> EE;
 
-    bool loadFromFile(const std::string& path);
+    bool loadFromFile(const string& path);
 
 private:
-    void buildConflictMatrix(const std::vector<std::vector<int>>& studentEvents);
+    void buildConflictMatrix(const vector<vector<int>>& studentEvents);
     void buildE0andT0();
     void buildEE();
 };

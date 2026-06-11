@@ -1,9 +1,10 @@
-// hgats.h ─────────────────────────────────────────────────────────────────────
 #pragma once
 #include "problem.h"
 #include "individual.h"
 #include "gsga.h"
 #include "tabu_search.h"
+
+using namespace std;
 
 // ─────────────────────────────────────────────────────────────────────────────
 //  HGATS: Hybrid GA + Tabu Search (Algorithm 15)
