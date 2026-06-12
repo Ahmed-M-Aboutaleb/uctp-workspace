@@ -7,6 +7,8 @@
 #include "mem.h"
 #include "local_search.h"
 
+using namespace std;
+
 class GSGA {
 public:
     struct Params {
@@ -18,16 +20,21 @@ public:
         double Pm              = 0.5;
         int    maxGenerations  = 100000;
         int    timeLimitSec    = 600;
-        int    stagnationLimit = 2000;
-        int    ls3InitSteps    = 5000;
+
+        int    stagnationLimit = 4000;
+
+        int    ls3InitSteps    = 4000;
         int    ls3ChildSteps   = 2000;
+
         int    ls4PercentTS    = 40;
+
+        unsigned seed           = 42;
     };
 
     GSGA(const Problem& p, const Params& par);
     Individual run();
 
-    const std::vector<Individual>& getPopulation() const {
+    const vector<Individual>& getPopulation() const {
         return population;
     }
 
@@ -38,10 +45,10 @@ private:
     LocalSearch    ls;
     MEM            mem;
 
-    std::vector<Individual> population;
+    vector<Individual> population;
     int generation = 0;
 
-    mutable std::mt19937 rng{std::random_device{}()};
+    mutable mt19937 rng;
 
     Individual initializeIndividual();
     void       constructMEM();
@@ -54,5 +61,5 @@ private:
     bool       isOptimal(const Individual& ind) const;
 
     int eventPenaltyFast(const Individual& ind, int e,
-                         const std::vector<std::vector<int>>& tsIdx) const;
+                         const vector<vector<int>>& tsIdx) const;
 };

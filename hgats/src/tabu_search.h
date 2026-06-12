@@ -12,6 +12,8 @@
 #include "individual.h"
 #include "local_search.h"
 
+using namespace std;
+
 class TabuSearch {
 public:
     struct Params {
@@ -43,8 +45,8 @@ private:
             return timeslot < o.timeslot;
         }
     };
-    std::deque<TabuEntry>  tabuList;
-    std::set<TabuEntry>    tabuSet;
+    deque<TabuEntry>  tabuList;
+    set<TabuEntry>    tabuSet;
 
     struct Move {
         int type          = 1;
@@ -57,7 +59,7 @@ private:
         int resultFitness = 0;
     };
 
-    std::vector<Move> generateNeighbors(
+    vector<Move> generateNeighbors(
         const Individual& ind,
         int numToCheck) const;
 
@@ -72,5 +74,5 @@ private:
     Individual perturbAndRestart(const Individual& best,
                                   LocalSearch& ls_ref);
 
-    mutable std::mt19937 rng{std::random_device{}()};
+    mutable mt19937 rng{random_device{}()};
 };

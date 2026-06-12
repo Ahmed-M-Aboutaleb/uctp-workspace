@@ -2,28 +2,30 @@
 #include <algorithm>
 #include <random>
 
-void MEM::construct(const std::vector<Individual>& population,
+using namespace std;
+
+void MEM::construct(const vector<Individual>& population,
                     double alpha,
                     const Evaluator& eval) {
     for (auto& l : lists) l.clear();
 
-    std::vector<const Individual*> sorted;
+    vector<const Individual*> sorted;
     sorted.reserve(population.size());
     for (const auto& ind : population)
         sorted.push_back(&ind);
 
-    std::sort(sorted.begin(), sorted.end(),
+    sort(sorted.begin(), sorted.end(),
               [](const Individual* a, const Individual* b) {
                   return a->fitness < b->fitness;
               });
 
-    int Q = std::max(1, (int)(alpha * (int)population.size()));
+    int Q = max(1, (int)(alpha * (int)population.size()));
 
     for (int idx = 0; idx < Q; ++idx) {
         const Individual& ind = *sorted[idx];
 
         // build tsIndex once per individual
-        std::vector<std::vector<int>> tsIdx(prob.numTimeslots);
+        vector<vector<int>> tsIdx(prob.numTimeslots);
         for (int e = 0; e < prob.numEvents; ++e) {
             int ts = ind.assignment[e].timeslot;
             if (ts >= 0 && ts < prob.numTimeslots)
@@ -36,7 +38,7 @@ void MEM::construct(const std::vector<Individual>& population,
                                ind.assignment[e].timeslot};
                 // avoid duplicates
                 auto& lst = lists[e];
-                if (std::find(lst.begin(), lst.end(), p) == lst.end())
+                if (find(lst.begin(), lst.end(), p) == lst.end())
                     lst.push_back(p);
             }
         }
@@ -46,24 +48,24 @@ void MEM::construct(const std::vector<Individual>& population,
 RoomTimePair MEM::randomPairFor(int eventId) const {
     const auto& lst = lists[eventId];
     if (lst.empty()) return {-1, -1};
-    std::uniform_int_distribution<int> dist(0, (int)lst.size() - 1);
+    uniform_int_distribution<int> dist(0, (int)lst.size() - 1);
     return lst[dist(rng)];
 }
 
 int MEM::eventPenaltyFast(const Individual& ind, int e,
-                           const std::vector<std::vector<int>>& tsIdx) const {
+                           const vector<vector<int>>& tsIdx) const {
     int pen = 0;
     const auto& a = ind.assignment[e];
 
     // H2
     const auto& sr = prob.events[e].suitableRooms;
-    if (std::find(sr.begin(), sr.end(), a.room) == sr.end())
+    if (find(sr.begin(), sr.end(), a.room) == sr.end())
         ++pen;
 
     // H4
     if (prob.events[e].hasTimeRestriction) {
         const auto& avail = prob.events[e].availableTimeSlots;
-        if (std::find(avail.begin(), avail.end(), a.timeslot) == avail.end())
+        if (find(avail.begin(), avail.end(), a.timeslot) == avail.end())
             ++pen;
     }
 

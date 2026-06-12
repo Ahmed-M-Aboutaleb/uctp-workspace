@@ -8,6 +8,8 @@
 #include "problem.h"
 #include "individual.h"
 
+using namespace std;
+
 class LocalSearch {
 public:
     LocalSearch(const Problem& p, const Evaluator& ev)
@@ -41,7 +43,7 @@ private:
     bool moveN6(Individual& ind, int percentTS);
 
     // Timeslot index for fast lookups
-    std::vector<std::vector<int>> tsEvents;
+    vector<vector<int>> tsEvents;
     void buildIndex(const Individual& ind);
     void moveEventInIndex(int e, int oldTs, int newTs);
 
@@ -56,15 +58,15 @@ private:
     // room assignment changed during matching (so caller can revert).
     int matchRoomBipartite(const Individual& ind,
                            int target_event, int ts,
-                           std::vector<std::pair<int,int>>& sideEffects) const;
+                           vector<pair<int,int>>& sideEffects) const;
 
     // Combined: greedy first, fallback to bipartite.
     // sideEffects is populated only when bipartite was used.
     int findBestRoom(const Individual& ind, int e, int ts,
-                     std::vector<std::pair<int,int>>& sideEffects,
+                     vector<pair<int,int>>& sideEffects,
                      int exclude1 = -1, int exclude2 = -1) const;
 
     bool isInfeasibleFast(const Individual& ind, int e) const;
 
-    mutable std::mt19937 rng{std::random_device{}()};
+    mutable mt19937 rng{random_device{}()};
 };

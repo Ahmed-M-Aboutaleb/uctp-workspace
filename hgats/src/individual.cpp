@@ -1,6 +1,8 @@
 #include "individual.h"
 #include <algorithm>
 
+using namespace std;
+
 int Evaluator::evaluate(Individual& ind) const {
     ind.distanceToFeasibility = countHardViolations(ind);
     ind.softConstraintPenalty = countSoftViolations(ind);
@@ -14,7 +16,7 @@ int Evaluator::countHardViolations(const Individual& ind) const {
     int violations = 0;
 
     // Build timeslot → events index
-    std::vector<std::vector<int>> tsEvents(prob.numTimeslots);
+    vector<vector<int>> tsEvents(prob.numTimeslots);
     for (int e = 0; e < prob.numEvents; ++e) {
         int ts = ind.assignment[e].timeslot;
         if (ts >= 0 && ts < prob.numTimeslots)
@@ -30,7 +32,7 @@ int Evaluator::countHardViolations(const Individual& ind) const {
 
         // H2: room must be suitable
         const auto& sr = prob.events[e].suitableRooms;
-        if (std::find(sr.begin(), sr.end(), a.room) == sr.end())
+        if (find(sr.begin(), sr.end(), a.room) == sr.end())
             ++violations;
 
         // H4: timeslot must be available
@@ -66,7 +68,7 @@ int Evaluator::eventHardPenalty(const Individual& ind, int e) const {
 
     // H2
     const auto& sr = prob.events[e].suitableRooms;
-    if (std::find(sr.begin(), sr.end(), a.room) == sr.end())
+    if (find(sr.begin(), sr.end(), a.room) == sr.end())
         ++pen;
 
     // H4
@@ -157,9 +159,9 @@ int Evaluator::countSoftViolations(const Individual& ind) const {
     const int SLOTS_PER_DAY = 9;
     int penalty = 0;
 
-    std::vector<std::vector<std::vector<int>>>
+    vector<vector<vector<int>>>
         studentDaySlots(prob.numStudents,
-            std::vector<std::vector<int>>(5));
+            vector<vector<int>>(5));
 
     for (int e = 0; e < prob.numEvents; ++e) {
         int ts = ind.assignment[e].timeslot;
@@ -174,7 +176,7 @@ int Evaluator::countSoftViolations(const Individual& ind) const {
         for (int d = 0; d < 5; ++d) {
             auto& slots = studentDaySlots[s][d];
             if (slots.empty()) continue;
-            std::sort(slots.begin(), slots.end());
+            sort(slots.begin(), slots.end());
 
             // S1: last slot of day
             if (slots.back() == SLOTS_PER_DAY - 1)
@@ -203,7 +205,7 @@ bool Evaluator::checkH4(const Individual& ind, int e) const {
     const auto& avail = prob.events[e].availableTimeSlots;
     if (avail.empty()) return true;
     int ts = ind.assignment[e].timeslot;
-    return std::find(avail.begin(), avail.end(), ts) != avail.end();
+    return find(avail.begin(), avail.end(), ts) != avail.end();
 }
 
 bool Evaluator::checkH5(const Individual& ind, int e) const {

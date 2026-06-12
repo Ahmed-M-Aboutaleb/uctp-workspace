@@ -3,22 +3,24 @@
 #include <iostream>
 #include <algorithm>
 
-bool Problem::loadFromFile(const std::string& path) {
-    std::ifstream fin(path);
+using namespace std;
+
+bool Problem::loadFromFile(const string& path) {
+    ifstream fin(path);
     if (!fin.is_open()) {
-        std::cerr << "[ERROR] Cannot open: " << path << "\n";
+        cerr << "[ERROR] Cannot open: " << path << "\n";
         return false;
     }
 
     size_t slash = path.find_last_of("/\\");
-    name = (slash == std::string::npos) ? path : path.substr(slash + 1);
+    name = (slash == string::npos) ? path : path.substr(slash + 1);
     size_t dot = name.find_last_of('.');
-    if (dot != std::string::npos) name = name.substr(0, dot);
+    if (dot != string::npos) name = name.substr(0, dot);
 
     fin >> numEvents >> numRooms >> numFeatures >> numStudents;
     numTimeslots = 45;
 
-    std::cout << "[INFO] Loading: " << name
+    cout << "[INFO] Loading: " << name
               << "  E=" << numEvents
               << "  R=" << numRooms
               << "  F=" << numFeatures
@@ -35,7 +37,7 @@ bool Problem::loadFromFile(const std::string& path) {
 
     // student-event: build per-event student list
     // and per-student event list for fast conflict detection
-    std::vector<std::vector<int>> studentEvents(numStudents);
+    vector<vector<int>> studentEvents(numStudents);
 
     for (int e = 0; e < numEvents; ++e) {
         events[e].students.clear();
@@ -53,8 +55,8 @@ bool Problem::loadFromFile(const std::string& path) {
     }
 
     // room features
-    std::vector<std::vector<bool>> roomFeature(
-        numRooms, std::vector<bool>(numFeatures, false));
+    vector<vector<bool>> roomFeature(
+        numRooms, vector<bool>(numFeatures, false));
     for (int r = 0; r < numRooms; ++r)
         for (int f = 0; f < numFeatures; ++f) {
             int val; fin >> val;
@@ -62,8 +64,8 @@ bool Problem::loadFromFile(const std::string& path) {
         }
 
     // event features
-    std::vector<std::vector<bool>> eventFeature(
-        numEvents, std::vector<bool>(numFeatures, false));
+    vector<vector<bool>> eventFeature(
+        numEvents, vector<bool>(numFeatures, false));
     for (int e = 0; e < numEvents; ++e)
         for (int f = 0; f < numFeatures; ++f) {
             int val; fin >> val;
@@ -114,7 +116,7 @@ bool Problem::loadFromFile(const std::string& path) {
     buildE0andT0();
     buildEE();
 
-    std::cout << "[INFO] Loaded OK. "
+    cout << "[INFO] Loaded OK. "
               << "E0=" << E0_events.size()
               << "  T0=" << T0_slots.size()
               << "  EE=" << EE.size() << "\n";
@@ -123,9 +125,9 @@ bool Problem::loadFromFile(const std::string& path) {
 }
 
 void Problem::buildConflictMatrix(
-    const std::vector<std::vector<int>>& studentEvents) {
+    const vector<vector<int>>& studentEvents) {
 
-    conflict.assign(numEvents, std::vector<bool>(numEvents, false));
+    conflict.assign(numEvents, vector<bool>(numEvents, false));
 
     // O(S × E_per_student²) بدل O(E² × S²)
     for (int s = 0; s < numStudents; ++s) {
@@ -147,7 +149,7 @@ void Problem::buildE0andT0() {
             E0_events.push_back(e);
 
     // T0_slots = timeslots مش مقيدة بأي event
-    std::vector<bool> isRestricted(numTimeslots, false);
+    vector<bool> isRestricted(numTimeslots, false);
     for (int e = 0; e < numEvents; ++e)
         if (events[e].hasTimeRestriction)
             for (int t : events[e].availableTimeSlots)
@@ -160,13 +162,13 @@ void Problem::buildE0andT0() {
     if (T0_slots.empty()) {
         for (int t = 0; t < numTimeslots; ++t)
             T0_slots.push_back(t);
-        std::cout << "[INFO] T0_slots empty, using all timeslots\n";
+        cout << "[INFO] T0_slots empty, using all timeslots\n";
     }
 
     if (E0_events.empty()) {
         for (int e = 0; e < numEvents; ++e)
             E0_events.push_back(e);
-        std::cout << "[INFO] E0_events empty, using all events\n";
+        cout << "[INFO] E0_events empty, using all events\n";
     }
 }
 
