@@ -1,9 +1,9 @@
 // components/enrollment-card.tsx
 'use client';
 
-import React, { useTransition } from 'react';
+import { useTransition } from 'react';
 import { Course } from '@/Types/CourseTypes';
-import { User, Users, Tag, CheckCircle, Loader2, MinusCircle, PlusCircle } from 'lucide-react';
+import { X, User, Users, Tag, CheckCircle, Loader2, MinusCircle, PlusCircle } from 'lucide-react';
 import { UnEnrollStudent } from '@/ServerActions/Enrollment/UnEnrollStudent';
 import { EnrollStudent } from '@/ServerActions/Enrollment/EnrollStudent';
 import { toast } from 'react-toastify';
@@ -15,7 +15,7 @@ interface Props {
 
 export default function EnrollmentCard({ course, currentStudentId }: Props) {
   const [isPending, startTransition] = useTransition();
-    
+
   const isEnrolled = course.students.some((s) => s.student_id === currentStudentId);
 
   const handleToggleEnrollment = () => {
@@ -28,14 +28,13 @@ export default function EnrollmentCard({ course, currentStudentId }: Props) {
         }
       } catch (error) {
         toast.error('Enrollment for this course is currently closed.')
-    }
+      }
     });
   };
 
   return (
-    <div className={`group relative flex flex-col overflow-hidden rounded-2xl border transition-all duration-300 ${
-      isEnrolled ? 'border-indigo-200 bg-indigo-50/20' : 'border-slate-200 bg-white'
-    }`}>
+    <div className={`group relative flex flex-col overflow-hidden rounded-2xl border transition-all duration-300 ${isEnrolled ? 'border-indigo-200 bg-indigo-50/20' : 'border-slate-200 bg-white'
+      }`}>
       <div className="flex flex-1 flex-col p-6">
         <div className="mb-4 flex items-start justify-between">
           <div className="space-y-1">
@@ -73,15 +72,16 @@ export default function EnrollmentCard({ course, currentStudentId }: Props) {
 
         <button
           onClick={handleToggleEnrollment}
-          disabled={isPending}
-          className={`mt-auto flex w-full items-center justify-center gap-2 rounded-xl py-3 text-sm font-bold transition-all disabled:opacity-50 ${
-            isEnrolled
-              ? 'bg-white border border-red-200 text-red-600 hover:bg-red-50'
-              : 'bg-indigo-700 text-white hover:bg-indigo-600'
-          }`}
+          disabled={isPending || course.is_enrollment_open === false}
+          className={`mt-auto flex w-full items-center justify-center gap-2 rounded-xl py-3 text-sm font-bold transition-all disabled:opacity-50 ${(isEnrolled || course.is_enrollment_open === false)
+            ? 'bg-white border border-red-200 text-red-600 hover:bg-red-50'
+            : 'bg-indigo-700 text-white hover:bg-indigo-600'
+            }`}
         >
           {isPending ? (
             <Loader2 className="animate-spin" size={18} />
+          ) : course.is_enrollment_open === false ? (
+            <><X size={18} /> Enrollment Closed</>
           ) : isEnrolled ? (
             <><MinusCircle size={18} /> Unenroll</>
           ) : (

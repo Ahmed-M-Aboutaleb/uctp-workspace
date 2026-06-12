@@ -33,7 +33,7 @@ interface EnrollmentLayoutProps {
 }
 
 const SEMESTER_COLORS: Record<string, string> = {
-    Fall:   "bg-orange-50 text-orange-600",
+    Fall: "bg-orange-50 text-orange-600",
     Spring: "bg-emerald-50 text-emerald-600",
     Summer: "bg-sky-50 text-sky-600",
 }
@@ -43,10 +43,10 @@ export default function EnrollmentLayout({ course, initialEnrollments }: Enrollm
 
     const [enrollments, setEnrollments] = useState<StudentResponse>(initialEnrollments)
     const [isOpen, setIsOpen] = useState<boolean>(() => {
-    if (typeof window === "undefined") return false
-    const saved = localStorage.getItem(`enrollment_open_${course.course_id}`)
-    return saved !== null ? JSON.parse(saved) : false
-})
+        if (typeof window === "undefined") return false
+        const saved = localStorage.getItem(`enrollment_open_${course.course_id}`)
+        return saved !== null ? JSON.parse(saved) : false
+    })
     const [isToggling, setIsToggling] = useState(false)
     const [isRefreshing, setIsRefreshing] = useState(false)
     const [searchQuery, setSearchQuery] = useState("")
@@ -62,20 +62,20 @@ export default function EnrollmentLayout({ course, initialEnrollments }: Enrollm
         return acc
     }, {})
 
-        const handleToggle = async () => {
-            setIsToggling(true)
-            try {
-                const result = await ToggleEnrollment(course.course_id, !isOpen)
-                const newState = !isOpen
-                setIsOpen(newState)
-                localStorage.setItem(`enrollment_open_${course.course_id}`, JSON.stringify(newState))
-                toast.success(result.message)
-            } catch {
-                toast.error("Failed to toggle enrollment status")
-            } finally {
-                setIsToggling(false)
-            }
+    const handleToggle = async () => {
+        setIsToggling(true)
+        try {
+            const result = await ToggleEnrollment(course.course_id, !isOpen)
+            const newState = !isOpen
+            setIsOpen(newState)
+            localStorage.setItem(`enrollment_open_${course.course_id}`, JSON.stringify(newState))
+            toast.success(result.message)
+        } catch {
+            toast.error("Failed to toggle enrollment status")
+        } finally {
+            setIsToggling(false)
         }
+    }
     const handleRefresh = async () => {
         setIsRefreshing(true)
         try {
@@ -94,7 +94,7 @@ export default function EnrollmentLayout({ course, initialEnrollments }: Enrollm
 
             {/* Back button */}
             <button
-                onClick={() => {router.back(); router.refresh()}}
+                onClick={() => { router.back(); router.refresh() }}
                 className="flex items-center gap-2 text-sm font-bold text-slate-500 hover:text-indigo-600 transition-colors group"
             >
                 <ArrowLeft className="h-4 w-4 group-hover:-translate-x-1 transition-transform" />
@@ -127,23 +127,6 @@ export default function EnrollmentLayout({ course, initialEnrollments }: Enrollm
                     </div>
                 </div>
 
-                {/* Toggle enrollment open/close */}
-                <button
-                    onClick={handleToggle}
-                    disabled={isToggling}
-                    className={`flex w-full md:w-auto items-center justify-center gap-2.5 rounded-xl px-6 py-3 text-sm font-bold shadow-lg transition-all active:scale-95 disabled:opacity-60 cursor-pointer
-                        ${isOpen
-                            ? "bg-gradient-to-r from-emerald-500 to-emerald-400 text-white hover:shadow-emerald-200"
-                            : "bg-gradient-to-r from-rose-500 to-rose-400 text-white hover:shadow-rose-200"
-                        }`}
-                >
-                    {isToggling
-                        ? <Loader2 className="h-4 w-4 animate-spin" />
-                        : isOpen
-                            ? <><ShieldCheck className="h-4 w-4" /> Enrollment Open</>
-                            : <><ShieldOff className="h-4 w-4" /> Enrollment Closed</>
-                    }
-                </button>
             </div>
 
             {/* Stats row */}
