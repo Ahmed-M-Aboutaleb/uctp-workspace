@@ -17,7 +17,7 @@ export function useLogout() {
       localStorage.clear()
       clearUser();
       toast.success("Logged out successfully")
-      router.push("/login")
+      router.push("/")
     } catch {
       toast.error("Failed to logout, please try again")
     } finally {

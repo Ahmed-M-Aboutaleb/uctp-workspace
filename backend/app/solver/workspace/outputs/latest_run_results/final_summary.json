@@ -3,7 +3,7 @@
     "dataset": "/app/app/solver/workspace/inputs/latest_run.dat",
     "events": 60,
     "rooms": 15,
-    "students": 200,
+    "students": 201,
     "timeslots": 45,
     "time_limit_sec": 90,
     "tp_percentage": 0.2,
@@ -11,9 +11,9 @@
   },
   "statistical_results": {
     "overall_fitness": {
-      "best": 111,
-      "worst": 111,
-      "mean": 111,
+      "best": 285,
+      "worst": 285,
+      "mean": 285,
       "stddev": 0
     },
     "hard_constraint_violations": {
@@ -23,15 +23,15 @@
       "stddev": 0
     },
     "soft_constraint_violations": {
-      "best": 111,
-      "worst": 111,
-      "mean": 111,
+      "best": 285,
+      "worst": 285,
+      "mean": 285,
       "stddev": 0
     },
     "generations_passed": {
-      "best": 6381,
-      "worst": 6381,
-      "mean": 6381,
+      "best": 100,
+      "worst": 100,
+      "mean": 100,
       "stddev": 0
     }
   }

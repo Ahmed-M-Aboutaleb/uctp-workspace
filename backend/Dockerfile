@@ -16,4 +16,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-RUN g++ -O3 -o /usr/local/bin/uctp_solver app/solver/src/main.cpp
+RUN g++ -O3 -std=c++17 -o /usr/local/bin/uctp_solver app/solver/src/hgats_for_backend/src/*.cpp -pthread

@@ -68,7 +68,13 @@ export default function LoginPage() {
         localStorage.setItem('email', result.user.email);
         reset();
         setTimeout(() => {
-          router.push("/");
+          if (result.user.role === "admin") {
+            router.push("/admin");
+          } else if (result.user.role === "instructor") {
+            router.push("/instructor")
+          } else if (result.user.role === "student") {
+            router.push("/student")
+          }
         }, 2000);
       } else {
         throw new Error(result.detail || "Login failed");

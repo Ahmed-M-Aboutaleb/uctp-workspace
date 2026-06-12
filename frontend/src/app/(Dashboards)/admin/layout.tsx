@@ -17,9 +17,9 @@ export default async function AdminLayout({
     console.error("Not authenticated or profile fetch failed");
   }
   if (!profile) {
-    redirect("/login");
+    redirect("/");
   }
-    profile.full_name = profile.full_name.toUpperCase();
+  profile.full_name = profile.full_name.toUpperCase();
 
 
   return (

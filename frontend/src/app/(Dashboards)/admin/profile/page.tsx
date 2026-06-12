@@ -12,10 +12,10 @@ export const metadata: Metadata = {
 
 export default async function ProfilePage() {
   const profile = await GetProfile();
-  
+
   if (!profile) {
     toast.error("Failed to load profile. Please log in again.");
-    redirect("/login");
+    redirect("/");
   }
 
   return <AdminProfile profile={profile} />;

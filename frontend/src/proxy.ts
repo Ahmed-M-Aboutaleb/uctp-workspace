@@ -7,7 +7,7 @@ const protectedRoutes = [
 ];
 
 const AuthRoutes = [
-    '/login',
+    '/',
 ]
 
 export function proxy(request: NextRequest) {
@@ -25,7 +25,7 @@ export function proxy(request: NextRequest) {
     );
 
     if (isProtectedRoute && !isAuthenticated) {
-        return NextResponse.redirect(new URL('/login', request.url))
+        return NextResponse.redirect(new URL('/', request.url))
     }
     // if(isAuthRoute && isAuthenticated){
     //     return NextResponse.redirect(new URL('/',request.url))
@@ -39,7 +39,7 @@ export function proxy(request: NextRequest) {
 
 export const config = {
     matcher: [
-        '/login',
+        '/',
         '/admin',
         '/student',
         '/instructor'

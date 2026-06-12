@@ -8,24 +8,24 @@ import { GetProfile } from "@/ServerActions/Profile/GetProfile";
 
 export default async function DashboardLayout({ children }: { children: ReactNode }) {
   let profile = null;
-  
-    try {
-      profile = await GetProfile();
-    } catch (error) {
-      console.error("Not authenticated or profile fetch failed");
-    }
-    if (!profile) {
-      redirect("/login");
-    }
+
+  try {
+    profile = await GetProfile();
+  } catch (error) {
+    console.error("Not authenticated or profile fetch failed");
+  }
+  if (!profile) {
+    redirect("/");
+  }
 
   return (
-  
-        <div className="flex min-h-screen bg-background">
-              <InstructorSidebar profile={profile} />
-              <div className="flex flex-1 flex-col">
-                <InstructorHeader />
-                <main className="flex-1 overflow-auto p-4 md:p-6">{children}</main>
-              </div>
-            </div>
+
+    <div className="flex min-h-screen bg-background">
+      <InstructorSidebar profile={profile} />
+      <div className="flex flex-1 flex-col">
+        <InstructorHeader />
+        <main className="flex-1 overflow-auto p-4 md:p-6">{children}</main>
+      </div>
+    </div>
   )
 }

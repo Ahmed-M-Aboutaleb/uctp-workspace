@@ -32,13 +32,6 @@ export function InstructorStateGrid({ profile, myCourses }: Props) {
       href: "/instructor/students",
     },
     {
-      title: "Active Features",
-      value: "",
-      icon: Calendar,
-      gradient: "from-emerald-600 to-teal-500",
-      href: "/instructor/timetable",
-    },
-    {
       title: "Avg. Class Size",
       value: myCourses.length > 0 ? Math.round(totalStudents / myCourses.length) : 0,
       icon: UserCheck,
