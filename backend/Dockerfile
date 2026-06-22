@@ -18,4 +18,4 @@ COPY . .
 
 RUN g++ -O3 -std=c++17 -o /usr/local/bin/uctp_solver app/solver/src/hgats_for_backend/src/*.cpp -pthread
 
-CMD ["sh", "-c", "alembic upgrade head && python scripts/initial_data.py && python scripts/seed_test_data.py && uvicorn main:app --host 0.0.0.0 --port 10000"]
+CMD ["sh", "-c", "alembic upgrade head && uvicorn main:app --host 0.0.0.0 --port 10000"]
