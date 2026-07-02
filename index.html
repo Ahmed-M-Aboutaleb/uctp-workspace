@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UCTP Workspace | Graduation Project</title>
+    
+    <!-- Google Fonts: Inter for a clean, modern look -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            400: '#60a5fa',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            900: '#1e3a8a',
+                        }
+                    },
+                    animation: {
+                        'blob': 'blob 7s infinite',
+                    },
+                    keyframes: {
+                        blob: {
+                            '0%': { transform: 'translate(0px, 0px) scale(1)' },
+                            '33%': { transform: 'translate(30px, -50px) scale(1.1)' },
+                            '66%': { transform: 'translate(-20px, 20px) scale(0.9)' },
+                            '100%': { transform: 'translate(0px, 0px) scale(1)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        /* Custom animations for entry effects */
+        .fade-in-up {
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        .delay-100 { animation-delay: 100ms; }
+        .delay-200 { animation-delay: 200ms; }
+        .delay-300 { animation-delay: 300ms; }
+        
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Glassmorphism utilities */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-200 font-sans antialiased overflow-x-hidden selection:bg-brand-500 selection:text-white">
+
+    <nav class="fixed w-full z-50 glass-card border-b border-white/10 transition-all duration-300" id="navbar">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-20">
+                <div class="flex-shrink-0 flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-400 to-brand-600 flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-brand-500/30">
+                        U
+                    </div>
+                    <span class="font-bold text-xl tracking-tight text-white">UCTP Workspace</span>
+                </div>
+                <div class="hidden md:flex items-center space-x-8">
+                    <a href="#about" class="text-sm font-medium text-slate-300 hover:text-white transition-colors">Project TL;DR</a>
+                    <a href="#tech-stack" class="text-sm font-medium text-slate-300 hover:text-white transition-colors">Tech Stack</a>
+                    <a href="#features" class="text-sm font-medium text-slate-300 hover:text-white transition-colors">Architecture</a>
+                    <a href="https://github.com/Ahmed-M-Aboutaleb/uctp-workspace.git" target="_blank" class="px-4 py-2 bg-white/10 rounded-lg text-sm font-medium text-white hover:bg-white/20 transition-colors flex items-center gap-2">
+                        <i class="fa-brands fa-github"></i> View Code
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <section class="relative min-h-screen flex items-center justify-center pt-20 overflow-hidden">
+        <div class="relative z-10 max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 text-center">
+            <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-card text-brand-400 text-sm font-medium mb-8 fade-in-up" id="about">
+                <span class="relative flex h-2.5 w-2.5">
+                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-400 opacity-75"></span>
+                  <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-brand-500"></span>
+                </span>
+                Graduation Project &bull; Class of 2026
+            </div>
+            
+            <h1 class="text-5xl md:text-7xl font-extrabold text-white tracking-tight mb-6 fade-in-up delay-100">
+                Automated University <br class="hidden md:block" />
+                <span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-400 to-indigo-400">
+                    Course Timetabling.
+                </span>
+            </h1>
+            
+            <p class="mt-4 max-w-2xl text-lg md:text-xl text-slate-300 mx-auto mb-4 fade-in-up delay-200 leading-relaxed font-medium">
+                A high-performance algorithm engine built to solve UCTP.
+            </p>
+
+            <p class="max-w-2xl text-base text-slate-500 mx-auto mb-10 fade-in-up delay-200 leading-relaxed">
+                <strong>Technical TL;DR:</strong> Designed and implemented a custom C++ optimization solver (Genetic Algorithms & Tabu Search) wrapped in a modern Python/FastAPI microservice architecture, benchmarked against international ITC-2007 standards.
+            </p>
+            
+            <div class="flex flex-col sm:flex-row justify-center items-center gap-4 fade-in-up delay-300 mb-16">
+                <!-- 1. Demo Link (Primary) -->
+                <a href="https://graduation-project-gold.vercel.app/" target="_blank" rel="noopener noreferrer" 
+                   class="w-full sm:w-auto px-8 py-4 bg-brand-600 hover:bg-brand-500 text-white rounded-xl font-semibold transition-all duration-200 shadow-lg shadow-brand-500/25 hover:shadow-brand-500/40 hover:-translate-y-1 flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-desktop"></i> Live Prototype
+                </a>
+                
+                <!-- 2. GitHub Link (Secondary) -->
+                <a href="https://github.com/Ahmed-M-Aboutaleb/uctp-workspace.git" target="_blank" rel="noopener noreferrer" 
+                   class="w-full sm:w-auto px-8 py-4 bg-slate-800 hover:bg-slate-700 text-white rounded-xl font-semibold transition-all duration-200 hover:-translate-y-1 flex items-center justify-center gap-2 border border-slate-700 hover:border-slate-600">
+                    <i class="fa-brands fa-github text-xl"></i> View Source Code
+                </a>
+
+                <!-- 3. Report Link (Tertiary) -->
+                <a href="https://github.com/Ahmed-M-Aboutaleb/uctp-workspace/blob/main/docs/uctp_project_report.pdf" target="_blank" rel="noopener noreferrer" 
+                   class="w-full sm:w-auto px-6 py-4 glass-card hover:bg-white/10 text-slate-300 rounded-xl font-medium transition-all duration-200 hover:-translate-y-1 flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-file-lines"></i> Read Paper
+                </a>
+            </div>
+
+            <div id="tech-stack" class="pt-8 border-t border-white/10 fade-in-up delay-300">
+                <p class="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-6">Core Technologies & Skills Demonstrated</p>
+                <div class="flex flex-wrap justify-center gap-3">
+                    <span class="px-4 py-2 rounded-lg glass-card text-blue-400 flex items-center gap-2 font-medium border-blue-500/20 hover:bg-blue-500/10 transition-colors">
+                        <i class="fa-solid fa-c"></i> C++ (Engine)
+                    </span>
+                    <span class="px-4 py-2 rounded-lg glass-card text-yellow-400 flex items-center gap-2 font-medium border-yellow-500/20 hover:bg-yellow-500/10 transition-colors">
+                        <i class="fa-brands fa-python"></i> Python
+                    </span>
+                    <span class="px-4 py-2 rounded-lg glass-card text-teal-400 flex items-center gap-2 font-medium border-teal-500/20 hover:bg-teal-500/10 transition-colors">
+                        <i class="fa-solid fa-server"></i> FastAPI
+                    </span>
+                    <span class="px-4 py-2 rounded-lg glass-card text-emerald-400 flex items-center gap-2 font-medium border-emerald-500/20 hover:bg-emerald-500/10 transition-colors">
+                        <i class="fa-solid fa-database"></i> SQL / ORM
+                    </span>
+                    <span class="px-4 py-2 rounded-lg glass-card text-purple-400 flex items-center gap-2 font-medium border-purple-500/20 hover:bg-purple-500/10 transition-colors">
+                        <i class="fa-solid fa-network-wired"></i> Microservices
+                    </span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="features" class="py-24 relative z-10 bg-slate-950/50 border-t border-white/5">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold text-white mb-4">Architecture & Competencies</h2>
+                <p class="text-slate-400 max-w-2xl mx-auto">A breakdown of the systems engineering and computer science principles applied in this project.</p>
+            </div>
+            
+            <div class="max-w-5xl mx-auto mb-20 fade-in-up delay-200">
+                <div class="glass-card rounded-2xl p-2 sm:p-4 border border-white/10 group shadow-2xl shadow-brand-500/10 relative overflow-hidden">
+                    <!-- Subtle background glow -->
+                    <div class="absolute inset-0 bg-gradient-to-b from-brand-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                    
+                    <!-- Diagram container (Light background for contrast with dark diagram lines) -->
+                    <div class="relative bg-slate-50 rounded-xl overflow-hidden p-6 sm:p-10 flex justify-center items-center">
+                        <img src="https://raw.githubusercontent.com/Ahmed-M-Aboutaleb/uctp-workspace/refs/heads/main/docs/system-architecture.png" alt="UCTP System Architecture Diagram" class="w-full max-w-3xl h-auto object-contain transition-transform duration-700 group-hover:scale-[1.02]">
+                    </div>
+                    
+                    <!-- Caption -->
+                    <div class="pt-5 pb-2 text-center relative z-10">
+                        <p class="text-sm font-semibold text-slate-300 tracking-wide uppercase">
+                            <i class="fa-solid fa-sitemap text-brand-400 mr-2"></i> System Data Flow & Microservices Architecture
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- Feature 1 -->
+                <div class="glass-card p-8 rounded-2xl hover:bg-white/5 transition-colors duration-300 border-t-2 border-t-brand-500 flex flex-col h-full">
+                    <div class="w-12 h-12 bg-brand-500/20 rounded-lg flex items-center justify-center mb-6 text-brand-400 text-2xl flex-shrink-0">
+                        <i class="fa-solid fa-microchip"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-3">Algorithm Design (C++)</h3>
+                    <p class="text-slate-400 leading-relaxed flex-grow">
+                        Engineered a high-performance optimization engine using Genetic Algorithms and Tabu Search to resolve complex multi-constraint scheduling conflicts.
+                    </p>
+                </div>
+                
+                <!-- Feature 2 -->
+                <div class="glass-card p-8 rounded-2xl hover:bg-white/5 transition-colors duration-300 border-t-2 border-t-purple-500 flex flex-col h-full">
+                    <div class="w-12 h-12 bg-purple-500/20 rounded-lg flex items-center justify-center mb-6 text-purple-400 text-2xl flex-shrink-0">
+                        <i class="fa-solid fa-server"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-3">Backend Architecture</h3>
+                    <p class="text-slate-400 leading-relaxed flex-grow">
+                        Designed a scalable asynchronous microservice using Python and FastAPI to bridge the high-speed C++ engine with modern web interfaces.
+                    </p>
+                </div>
+                
+                <!-- Feature 3 -->
+                <div class="glass-card p-8 rounded-2xl hover:bg-white/5 transition-colors duration-300 border-t-2 border-t-emerald-500 flex flex-col h-full">
+                    <div class="w-12 h-12 bg-emerald-500/20 rounded-lg flex items-center justify-center mb-6 text-emerald-400 text-2xl flex-shrink-0">
+                        <i class="fa-solid fa-database"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-3">Data Modeling & UI</h3>
+                    <p class="text-slate-400 leading-relaxed flex-grow">
+                        Modeled complex university entities (rooms, professors, constraints) into relational databases and exposed them via a clean, user-friendly interactive dashboard.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="demo-access" class="py-24 relative z-10 border-t border-white/5 bg-slate-900/30">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-16">
+                <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-card text-emerald-400 text-sm font-medium mb-4 fade-in-up">
+                    <i class="fa-solid fa-key"></i> Test Accounts
+                </div>
+                <h2 class="text-3xl md:text-4xl font-bold text-white mb-4 fade-in-up delay-100">Live Prototype Access</h2>
+                <p class="text-slate-400 max-w-2xl mx-auto fade-in-up delay-200">Bypass the registration process. Use these pre-configured credentials to explore the different role-based dashboards in the live system.</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto fade-in-up delay-300">
+                <!-- Admin Card -->
+                <div class="glass-card p-6 rounded-2xl border-t-4 border-t-rose-500 hover:-translate-y-1 transition-transform duration-300">
+                    <div class="flex items-center gap-4 mb-6">
+                        <div class="w-12 h-12 rounded-full bg-rose-500/20 flex items-center justify-center text-rose-400 text-xl">
+                            <i class="fa-solid fa-user-shield"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-bold text-white">System Admin</h3>
+                            <p class="text-xs text-slate-400 uppercase tracking-wider font-semibold">Full Access</p>
+                        </div>
+                    </div>
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-center bg-slate-950/80 p-3 rounded-lg border border-white/5 group">
+                            <span class="text-sm font-mono text-slate-300">admin@uni.edu</span>
+                            <button onclick="copyToClipboard('admin@uni.edu', this)" class="text-slate-500 hover:text-white transition-colors p-1" title="Copy Email">
+                                <i class="fa-regular fa-copy"></i>
+                            </button>
+                        </div>
+                        <div class="flex justify-between items-center bg-slate-950/80 p-3 rounded-lg border border-white/5 group">
+                            <span class="text-sm font-mono text-slate-300">admin</span>
+                            <button onclick="copyToClipboard('admin', this)" class="text-slate-500 hover:text-white transition-colors p-1" title="Copy Password">
+                                <i class="fa-regular fa-copy"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Instructor Card -->
+                <div class="glass-card p-6 rounded-2xl border-t-4 border-t-violet-500 hover:-translate-y-1 transition-transform duration-300">
+                    <div class="flex items-center gap-4 mb-6">
+                        <div class="w-12 h-12 rounded-full bg-violet-500/20 flex items-center justify-center text-violet-400 text-xl">
+                            <i class="fa-solid fa-chalkboard-user"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-bold text-white">Instructor</h3>
+                            <p class="text-xs text-slate-400 uppercase tracking-wider font-semibold">Faculty View</p>
+                        </div>
+                    </div>
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-center bg-slate-950/80 p-3 rounded-lg border border-white/5 group">
+                            <span class="text-sm font-mono text-slate-300">instructor1@uni.edu</span>
+                            <button onclick="copyToClipboard('instructor1@uni.edu', this)" class="text-slate-500 hover:text-white transition-colors p-1" title="Copy Email">
+                                <i class="fa-regular fa-copy"></i>
+                            </button>
+                        </div>
+                        <div class="flex justify-between items-center bg-slate-950/80 p-3 rounded-lg border border-white/5 group">
+                            <span class="text-sm font-mono text-slate-300">pass123</span>
+                            <button onclick="copyToClipboard('pass123', this)" class="text-slate-500 hover:text-white transition-colors p-1" title="Copy Password">
+                                <i class="fa-regular fa-copy"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Student Card -->
+                <div class="glass-card p-6 rounded-2xl border-t-4 border-t-sky-500 hover:-translate-y-1 transition-transform duration-300">
+                    <div class="flex items-center gap-4 mb-6">
+                        <div class="w-12 h-12 rounded-full bg-sky-500/20 flex items-center justify-center text-sky-400 text-xl">
+                            <i class="fa-solid fa-user-graduate"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-bold text-white">Student</h3>
+                            <p class="text-xs text-slate-400 uppercase tracking-wider font-semibold">Enrolled View</p>
+                        </div>
+                    </div>
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-center bg-slate-950/80 p-3 rounded-lg border border-white/5 group">
+                            <span class="text-sm font-mono text-slate-300">student1@uni.edu</span>
+                            <button onclick="copyToClipboard('student1@uni.edu', this)" class="text-slate-500 hover:text-white transition-colors p-1" title="Copy Email">
+                                <i class="fa-regular fa-copy"></i>
+                            </button>
+                        </div>
+                        <div class="flex justify-between items-center bg-slate-950/80 p-3 rounded-lg border border-white/5 group">
+                            <span class="text-sm font-mono text-slate-300">pass123</span>
+                            <button onclick="copyToClipboard('pass123', this)" class="text-slate-500 hover:text-white transition-colors p-1" title="Copy Password">
+                                <i class="fa-regular fa-copy"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Responsive Footer -->
+    <footer class="border-t border-white/10 bg-slate-950/80 py-8 relative z-10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-4 text-center md:text-left">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-brand-400 to-brand-600 flex items-center justify-center text-white font-bold text-sm shadow-md">
+                    U
+                </div>
+                <span class="font-semibold text-slate-300 text-sm">UCTP Workspace</span>
+            </div>
+            <p class="text-sm text-slate-500">
+                Built for the Class of 2026 &bull; Automated University Course Timetabling
+            </p>
+        </div>
+    </footer>
+
+    <!-- Script for navbar blur effect on scroll -->
+    <script>
+        window.addEventListener('scroll', () => {
+            const navbar = document.getElementById('navbar');
+            if (window.scrollY > 20) {
+                navbar.classList.add('bg-slate-950/80');
+                navbar.classList.remove('bg-transparent');
+            } else {
+                navbar.classList.remove('bg-slate-950/80');
+                navbar.classList.add('bg-transparent');
+            }
+        });
+
+        function copyToClipboard(text, btnElement) {
+            // Create a temporary textarea for wide compatibility (including iframes)
+            const textArea = document.createElement("textarea");
+            textArea.value = text;
+            textArea.style.position = "fixed";  // Avoid scrolling to bottom
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+
+            try {
+                document.execCommand('copy');
+                // Visual feedback
+                const icon = btnElement.querySelector('i');
+                const originalClass = icon.className;
+                icon.className = 'fa-solid fa-check text-emerald-400';
+                
+                // Reset icon after 2 seconds
+                setTimeout(() => {
+                    icon.className = originalClass;
+                }, 2000);
+            } catch (err) {
+                console.error('Fallback: Oops, unable to copy', err);
+            }
+
+            document.body.removeChild(textArea);
+        }
+    </script>
+</body>
+</html>
